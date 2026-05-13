@@ -10,7 +10,7 @@ import {
   Search,
   User,
   Trophy,
-  Target
+  Medal
 } from 'lucide-react'
 
 export default function HomePage() {
@@ -20,9 +20,6 @@ export default function HomePage() {
 
   const [agentName, setAgentName] = useState('')
   const [agentPhone, setAgentPhone] = useState('')
-
-  const [showAddObject, setShowAddObject] = useState(false)
-  const [showAddClient, setShowAddClient] = useState(false)
 
   const [objects, setObjects] = useState([
     {
@@ -60,58 +57,29 @@ export default function HomePage() {
   ])
 
   const [newObject, setNewObject] = useState({
-    type: 'Квартира',
-    price: '',
-    rooms: '',
-    area: '',
-    floor: '',
-    district: '',
-    address: ''
+    type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: '', address: ''
   })
 
   const [newClient, setNewClient] = useState({
-    clientType: 'Покупатель',
-    propertyType: 'Квартира',
-    budgetFrom: '',
-    budgetTo: '',
-    roomsFrom: '',
-    roomsTo: '',
-    floorFrom: '',
-    floorTo: '',
-    areaFrom: '',
-    areaTo: '',
-    district: '',
-    address: ''
+    clientType: 'Покупатель', propertyType: 'Квартира', budgetFrom: '', budgetTo: '',
+    roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '',
+    district: '', address: ''
   })
 
   const addObject = () => {
-    setObjects([
-      ...objects,
-      {
-        id: Date.now(),
-        ...newObject,
-        agent: agentName,
-        phone: agentPhone
-      }
-    ])
-    setShowAddObject(false)
+    if(!newObject.price) return alert("Введите цену");
+    setObjects([...objects, { id: Date.now(), ...newObject, agent: agentName, phone: agentPhone }]);
+    setNewObject({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: '', address: '' });
+    alert("Объект добавлен в реестр");
   }
 
   const addClient = () => {
-    setClients([
-      ...clients,
-      {
-        id: Date.now(),
-        ...newClient,
-        agent: agentName,
-        phone: agentPhone
-      }
-    ])
-    setShowAddClient(false)
+    setClients([...clients, { id: Date.now(), ...newClient, agent: agentName, phone: agentPhone }]);
+    alert("Клиент добавлен в реестр");
   }
 
-  const sellers = clients.filter(client => client.clientType === 'Продавец')
-  const buyers = clients.filter(client => client.clientType === 'Покупатель')
+  const sellers = clients.filter(c => c.clientType === 'Продавец')
+  const buyers = clients.filter(c => c.clientType === 'Покупатель')
 
   if (!loggedIn) {
     return (
@@ -119,25 +87,9 @@ export default function HomePage() {
         <div className="login-card">
           <h1>B2B GARANT</h1>
           <p>CRM система для риелторов</p>
-          <input
-            placeholder="Имя агента"
-            value={agentName}
-            onChange={e => setAgentName(e.target.value)}
-          />
-          <input
-            placeholder="Номер телефона"
-            value={agentPhone}
-            onChange={e => setAgentPhone(e.target.value)}
-          />
-          <button
-            onClick={() => {
-              if (agentName && agentPhone) {
-                setLoggedIn(true)
-              }
-            }}
-          >
-            ВОЙТИ
-          </button>
+          <input placeholder="Имя агента" value={agentName} onChange={e => setAgentName(e.target.value)} />
+          <input placeholder="Номер телефона" value={agentPhone} onChange={e => setAgentPhone(e.target.value)} />
+          <button onClick={() => { if (agentName && agentPhone) setLoggedIn(true) }}>ВОЙТИ</button>
         </div>
       </main>
     )
@@ -150,239 +102,150 @@ export default function HomePage() {
           <h1>B2B GARANT</h1>
           <p>CRM система</p>
         </div>
-        <button className="profile-btn">
-          <User size={20} />
-        </button>
+        <button className="profile-btn"><User size={20} /></button>
       </header>
 
-      <section className="content">
+      <section className="content" style={{ paddingBottom: '80px' }}>
+        
         {activeTab === 'home' && (
           <>
-            {/* Секция статистики в рамках */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
-              
-              {/* Блок агента */}
               <div>
-                <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#666', marginBottom: '8px', textTransform: 'uppercase' }}>Мои показатели</p>
+                <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#666', marginBottom: '8px' }}>МОИ ПОКАЗАТЕЛИ</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                  <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px', textAlign: 'center', background: '#fff' }}>
-                    <h3 style={{ margin: 0 }}>{buyers.length}</h3>
-                    <span style={{ fontSize: '10px', color: '#888' }}>Покупатели</span>
-                  </div>
-                  <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px', textAlign: 'center', background: '#fff' }}>
-                    <h3 style={{ margin: 0 }}>{sellers.length}</h3>
-                    <span style={{ fontSize: '10px', color: '#888' }}>Продавцы</span>
-                  </div>
-                  <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px', textAlign: 'center', background: '#fff' }}>
-                    <h3 style={{ margin: 0 }}>0</h3>
-                    <span style={{ fontSize: '10px', color: '#888' }}>Матчи</span>
-                  </div>
+                  <div className="stat-box-simple"><h3>{buyers.length}</h3><span>Покупатели</span></div>
+                  <div className="stat-box-simple"><h3>{sellers.length}</h3><span>Продавцы</span></div>
+                  <div className="stat-box-simple"><h3>0</h3><span>Матчи</span></div>
                 </div>
               </div>
 
-              {/* Блок компании */}
               <div>
-                <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#666', marginBottom: '8px', textTransform: 'uppercase' }}>Показатели компании</p>
+                <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#666', marginBottom: '8px' }}>КОМПАНИЯ</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                  <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px', textAlign: 'center', background: '#fff' }}>
-                    <h3 style={{ margin: 0 }}>124</h3>
-                    <span style={{ fontSize: '10px', color: '#888' }}>Всего покупателей</span>
-                  </div>
-                  <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px', textAlign: 'center', background: '#fff' }}>
-                    <h3 style={{ margin: 0 }}>86</h3>
-                    <span style={{ fontSize: '10px', color: '#888' }}>Всего продавцов</span>
-                  </div>
-                  <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px', textAlign: 'center', background: '#fff' }}>
-                    <h3 style={{ margin: 0 }}>12</h3>
-                    <span style={{ fontSize: '10px', color: '#888' }}>Агенты</span>
-                  </div>
+                  <div className="stat-box-simple"><h3>124</h3><span>Покупатели</span></div>
+                  <div className="stat-box-simple"><h3>86</h3><span>Продавцы</span></div>
+                  <div className="stat-box-simple"><h3>12</h3><span>Агенты</span></div>
                 </div>
               </div>
-
             </div>
 
             <div className="agents-section">
-              <div className="section-title">
-                <Trophy size={18} />
-                Лучшие агенты
-              </div>
-              <div className="agent-card">
-                <div>
-                  <h3>Alexander</h3>
-                  <p>12 покупателей • 8 продавцов</p>
+              <div className="section-title"><Trophy size={18} /> Лучшие агенты</div>
+              {[ 
+                { name: 'Alexander', b: 12, s: 8, color: '#FFD700' },
+                { name: 'Emma', b: 9, s: 7, color: '#C0C0C0' },
+                { name: 'Daniel', b: 8, s: 6, color: '#CD7F32' }
+              ].map((agent, index) => (
+                <div key={agent.name} style={{ display: 'flex', alignItems: 'center', background: '#fff', padding: '12px', borderRadius: '12px', marginBottom: '10px', border: '1px solid #eee' }}>
+                  <div style={{ width: '30px', fontWeight: 'bold', color: agent.color }}>{index + 1}</div>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>{agent.name}</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>{agent.b} покупателей • {agent.s} продавцов</p>
+                  </div>
+                  <Medal size={20} color={agent.color} />
                 </div>
-              </div>
-              <div className="agent-card">
-                <div>
-                  <h3>Emma</h3>
-                  <p>9 покупателей • 7 продавцов</p>
-                </div>
-              </div>
-              <div className="agent-card">
-                <div>
-                  <h3>Daniel</h3>
-                  <p>8 покупателей • 6 продавцов</p>
-                </div>
-              </div>
+              ))}
             </div>
           </>
         )}
 
         {activeTab === 'objects' && (
-          <>
-            <div className="section-header">
-              <h2>Добавить объект</h2>
-              <button onClick={() => setShowAddObject(true)}>
-                <Plus size={18} />
-              </button>
+          <div style={{ background: '#fff', padding: '20px', borderRadius: '15px', border: '1px solid #eee' }}>
+            <h2 style={{ marginBottom: '15px' }}>Добавить объект</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <select className="form-input" onChange={e => setNewObject({...newObject, type: e.target.value})}>
+                <option>Квартира</option><option>Дом</option>
+              </select>
+              <input className="form-input" placeholder="Цена" onChange={e => setNewObject({...newObject, price: e.target.value})} />
+              <input className="form-input" placeholder="Кв²" onChange={e => setNewObject({...newObject, area: e.target.value})} />
+              <input className="form-input" placeholder="Комнаты" onChange={e => setNewObject({...newObject, rooms: e.target.value})} />
+              <input className="form-input" placeholder="Этаж" onChange={e => setNewObject({...newObject, floor: e.target.value})} />
+              <input className="form-input" placeholder="Район" onChange={e => setNewObject({...newObject, district: e.target.value})} />
+              <input className="form-input" placeholder="Адрес" onChange={e => setNewObject({...newObject, address: e.target.value})} />
+              <button className="save-btn" onClick={addObject}>СОХРАНИТЬ ОБЪЕКТ</button>
             </div>
-          </>
+          </div>
         )}
 
         {activeTab === 'clients' && (
-          <>
-            <div className="section-header">
-              <h2>Добавить клиента</h2>
-              <button onClick={() => setShowAddClient(true)}>
-                <Plus size={18} />
-              </button>
+          <div style={{ background: '#fff', padding: '20px', borderRadius: '15px', border: '1px solid #eee' }}>
+            <h2 style={{ marginBottom: '15px' }}>Добавить клиента</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <select className="form-input" onChange={e => setNewClient({...newClient, clientType: e.target.value})}><option>Покупатель</option><option>Продавец</option></select>
+                <select className="form-input" onChange={e => setNewClient({...newClient, propertyType: e.target.value})}><option>Квартира</option><option>Дом</option></select>
+              </div>
+              
+              <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#666' }}>Цена (от / до)</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <input className="form-input" placeholder="От" onChange={e => setNewClient({...newClient, budgetFrom: e.target.value})} />
+                <input className="form-input" placeholder="До" onChange={e => setNewClient({...newClient, budgetTo: e.target.value})} />
+              </div>
+
+              <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#666' }}>Кв² (от / до)</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <input className="form-input" placeholder="От" onChange={e => setNewClient({...newClient, areaFrom: e.target.value})} />
+                <input className="form-input" placeholder="До" onChange={e => setNewClient({...newClient, areaTo: e.target.value})} />
+              </div>
+
+              <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#666' }}>Комнаты (от / до)</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <input className="form-input" placeholder="От" onChange={e => setNewClient({...newClient, roomsFrom: e.target.value})} />
+                <input className="form-input" placeholder="До" onChange={e => setNewClient({...newClient, roomsTo: e.target.value})} />
+              </div>
+
+              <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#666' }}>Этаж (от / до)</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <input className="form-input" placeholder="От" onChange={e => setNewClient({...newClient, floorFrom: e.target.value})} />
+                <input className="form-input" placeholder="До" onChange={e => setNewClient({...newClient, floorTo: e.target.value})} />
+              </div>
+
+              <input className="form-input" placeholder="Район" onChange={e => setNewClient({...newClient, district: e.target.value})} />
+              <input className="form-input" placeholder="Адрес" onChange={e => setNewClient({...newClient, address: e.target.value})} />
+              <button className="save-btn" onClick={addClient}>СОХРАНИТЬ КЛИЕНТА</button>
             </div>
-          </>
+          </div>
         )}
 
         {activeTab === 'registry' && (
           <>
             <div className="registry-tabs">
-              <button
-                className={registryTab === 'objects' ? 'active' : ''}
-                onClick={() => setRegistryTab('objects')}
-              >
-                Объекты
-              </button>
-              <button
-                className={registryTab === 'clients' ? 'active' : ''}
-                onClick={() => setRegistryTab('clients')}
-              >
-                Клиенты
-              </button>
-              <button
-                className={registryTab === 'agents' ? 'active' : ''}
-                onClick={() => setRegistryTab('agents')}
-              >
-                Агенты
-              </button>
+              <button className={registryTab === 'objects' ? 'active' : ''} onClick={() => setRegistryTab('objects')}>Объекты</button>
+              <button className={registryTab === 'clients' ? 'active' : ''} onClick={() => setRegistryTab('clients')}>Клиенты</button>
+              <button className={registryTab === 'agents' ? 'active' : ''} onClick={() => setRegistryTab('agents')}>Агенты</button>
             </div>
-
-            <div className="search-box">
-              <Search size={18} />
-              <input placeholder="Поиск..." />
-            </div>
-
-            {registryTab === 'objects' &&
-              objects.map(object => (
-                <div className="registry-card" key={object.id}>
-                  <h3>{object.type}</h3>
-                  <p>{object.rooms} комнаты • {object.area}м²</p>
-                  <p>Этаж: {object.floor}</p>
-                  <p>{object.district}</p>
-                  <strong>€ {object.price}</strong>
-                  <span>{object.agent}</span>
-                </div>
-              ))}
-
-            {registryTab === 'clients' &&
-              clients.map(client => (
-                <div className="registry-card" key={client.id}>
-                  <h3>{client.clientType}</h3>
-                  <p>{client.propertyType}</p>
-                  <p>€ {client.budgetFrom} - € {client.budgetTo}</p>
-                  <p>{client.roomsFrom}-{client.roomsTo} комнаты</p>
-                  <span>{client.agent}</span>
-                </div>
-              ))}
-
-            {registryTab === 'agents' && (
-              <>
-                <div className="registry-card">
-                  <h3>Alexander</h3>
-                  <p>Покупатели: 12</p>
-                  <p>Продавцы: 8</p>
-                  <span>+49 111 111</span>
-                </div>
-                <div className="registry-card">
-                  <h3>Emma</h3>
-                  <p>Покупатели: 9</p>
-                  <p>Продавцы: 7</p>
-                  <span>+49 222 222</span>
-                </div>
-              </>
-            )}
+            <div className="search-box"><Search size={18} /><input placeholder="Поиск..." /></div>
+            {registryTab === 'objects' && objects.map(obj => (
+              <div className="registry-card" key={obj.id}>
+                <h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p>
+                <p>{obj.district}, {obj.address}</p><strong>€ {obj.price}</strong><span>{obj.agent}</span>
+              </div>
+            ))}
+            {registryTab === 'clients' && clients.map(cl => (
+              <div className="registry-card" key={cl.id}>
+                <h3>{cl.clientType}</h3><p>{cl.propertyType} • {cl.roomsFrom}-{cl.roomsTo} комн</p>
+                <p>Бюджет: € {cl.budgetFrom} - {cl.budgetTo}</p><span>{cl.agent}</span>
+              </div>
+            ))}
           </>
         )}
       </section>
 
       <nav className="bottom-nav">
-        <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}>
-          <Home size={22} />
-          <span>Главная</span>
-        </button>
-        <button className={activeTab === 'objects' ? 'active' : ''} onClick={() => setActiveTab('objects')}>
-          <Building2 size={22} />
-          <span>Объект</span>
-        </button>
-        <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}>
-          <Users size={22} />
-          <span>Клиент</span>
-        </button>
-        <button className={activeTab === 'registry' ? 'active' : ''} onClick={() => setActiveTab('registry')}>
-          <ClipboardList size={22} />
-          <span>Реестр</span>
-        </button>
+        <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}><Home size={22} /><span>Главная</span></button>
+        <button className={activeTab === 'objects' ? 'active' : ''} onClick={() => setActiveTab('objects')}><Building2 size={22} /><span>Объект</span></button>
+        <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}><Users size={22} /><span>Клиент</span></button>
+        <button className={activeTab === 'registry' ? 'active' : ''} onClick={() => setActiveTab('registry')}><ClipboardList size={22} /><span>Реестр</span></button>
       </nav>
 
-      {/* Модалки (Add Object / Add Client) без изменений */}
-      {showAddObject && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Добавить объект</h2>
-            <select onChange={e => setNewObject({ ...newObject, type: e.target.value })}>
-              <option>Квартира</option>
-              <option>Дом</option>
-            </select>
-            <input placeholder="Цена" onChange={e => setNewObject({ ...newObject, price: e.target.value })} />
-            <input placeholder="Комнаты" onChange={e => setNewObject({ ...newObject, rooms: e.target.value })} />
-            <input placeholder="Кв²" onChange={e => setNewObject({ ...newObject, area: e.target.value })} />
-            <input placeholder="Этаж" onChange={e => setNewObject({ ...newObject, floor: e.target.value })} />
-            <input placeholder="Район" onChange={e => setNewObject({ ...newObject, district: e.target.value })} />
-            <input placeholder="Адрес" onChange={e => setNewObject({ ...newObject, address: e.target.value })} />
-            <button onClick={addObject}>Сохранить объект</button>
-            <button onClick={() => setShowAddObject(false)} style={{ background: '#eee', color: '#000', marginTop: '10px' }}>Отмена</button>
-          </div>
-        </div>
-      )}
-
-      {showAddClient && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Добавить клиента</h2>
-            <select onChange={e => setNewClient({ ...newClient, clientType: e.target.value })}>
-              <option>Покупатель</option>
-              <option>Продавец</option>
-            </select>
-            <select onChange={e => setNewClient({ ...newClient, propertyType: e.target.value })}>
-              <option>Квартира</option>
-              <option>Дом</option>
-            </select>
-            <input placeholder="Цена от" onChange={e => setNewClient({ ...newClient, budgetFrom: e.target.value })} />
-            <input placeholder="Цена до" onChange={e => setNewClient({ ...newClient, budgetTo: e.target.value })} />
-            <input placeholder="Комнаты от" onChange={e => setNewClient({ ...newClient, roomsFrom: e.target.value })} />
-            <input placeholder="Комнаты до" onChange={e => setNewClient({ ...newClient, roomsTo: e.target.value })} />
-            <button onClick={addClient}>Сохранить клиента</button>
-            <button onClick={() => setShowAddClient(false)} style={{ background: '#eee', color: '#000', marginTop: '10px' }}>Отмена</button>
-          </div>
-        </div>
-      )}
+      <style jsx>{`
+        .stat-box-simple { border: 1px solid #eee; padding: 10px; borderRadius: 12px; textAlign: center; background: #fff; }
+        .stat-box-simple h3 { margin: 0; font-size: 18px; }
+        .stat-box-simple span { font-size: 10px; color: #888; text-transform: uppercase; }
+        .form-input { padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; width: 100%; outline: none; }
+        .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; border: none; }
+      `}</style>
     </main>
   )
-            }
-                
+              }
+                                                                                            

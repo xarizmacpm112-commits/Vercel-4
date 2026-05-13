@@ -30,6 +30,10 @@ export default function HomePage() {
     return number.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
   }
 
+  // Состояния для фильтров реестра (чтобы работал ввод с пробелами)
+  const [filterPriceFrom, setFilterPriceFrom] = useState('')
+  const [filterPriceTo, setFilterPriceTo] = useState('')
+
   // База данных
   const [objects, setObjects] = useState([
     { id: 1, type: 'Квартира', price: '8500000', rooms: '3', area: '85', floor: '4', district: 'Ленинский', address: 'ул. Пушкина, 10', agent: 'Alexander' }
@@ -190,8 +194,8 @@ export default function HomePage() {
                     <div className="filter-fields">
                       <select className="form-input"><option>Все типы</option><option>Квартира</option><option>Дом</option></select>
                       <div className="dual-input">
-                        <input className="form-input" placeholder="Цена от" />
-                        <input className="form-input" placeholder="Цена до" />
+                        <input className="form-input" placeholder="Цена от" value={formatNumber(filterPriceFrom)} onChange={e => setFilterPriceFrom(e.target.value.replace(/\s/g, ''))} />
+                        <input className="form-input" placeholder="Цена до" value={formatNumber(filterPriceTo)} onChange={e => setFilterPriceTo(e.target.value.replace(/\s/g, ''))} />
                       </div>
                       <div className="dual-input">
                         <input className="form-input" placeholder="Кв² от" />
@@ -290,4 +294,4 @@ export default function HomePage() {
     </main>
   )
                 }
-                
+      

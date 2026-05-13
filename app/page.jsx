@@ -1,392 +1,290 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Bell,
-  Search,
+  Home,
   Building2,
   Users,
-  Wallet,
-  TrendingUp,
-  Settings,
-  LayoutDashboard,
+  ClipboardList,
+  Bell,
+  User,
+  Search,
   Plus,
-  MapPin,
-  BedDouble,
-  Maximize,
-  X,
-  Phone,
-  Mail
+  X
 } from 'lucide-react'
 
-const stats = [
-  { title: 'Покупатели', value: '842', icon: Users },
-  { title: 'Объекты', value: '154', icon: Building2 },
-  { title: 'Сделки', value: '92', icon: Wallet },
-  { title: 'Рост', value: '+24%', icon: TrendingUp }
-]
-
-const properties = [
-  {
-    id: 1,
-    title: 'Skyline Residence',
-    city: 'Berlin',
-    price: '€890,000',
-    rooms: 4,
-    area: 148,
-    image:
-      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1200&auto=format&fit=crop'
-  },
-  {
-    id: 2,
-    title: 'Modern Penthouse',
-    city: 'Frankfurt',
-    price: '€1,250,000',
-    rooms: 5,
-    area: 220,
-    image:
-      'https://images.unsplash.com/photo-1494526585095-c41746248156?q=80&w=1200&auto=format&fit=crop'
-  }
-]
-
-const clients = [
-  {
-    name: 'Alexander Wolf',
-    phone: '+49 151 000 000',
-    status: 'Покупатель'
-  },
-  {
-    name: 'Emma Carter',
-    phone: '+49 151 111 111',
-    status: 'Продавец'
-  }
-]
-
 export default function HomePage() {
-  const [showModal, setShowModal] = useState(false)
+  const [activeTab, setActiveTab] = useState('home')
+  const [showAddObject, setShowAddObject] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
 
   return (
-    <main className="min-h-screen bg-main text-slate-900 overflow-hidden">
-      <div className="bg-blur one"></div>
-      <div className="bg-blur two"></div>
-
-      <section className="min-h-screen flex items-center justify-center p-5">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass login-card"
-        >
-          <div className="text-center mb-8">
-            <div className="logo-box mx-auto mb-5">
-              <Building2 size={32} />
+    <main className="app-container">
+      {!loggedIn ? (
+        <section className="login-screen">
+          <div className="login-card glass">
+            <div className="logo-wrap">
+              <Building2 size={34} />
             </div>
 
-            <h1 className="text-5xl font-black tracking-tight">
-              NovaCRM
-            </h1>
+            <h1 className="login-title">Nova CRM</h1>
 
-            <p className="text-slate-500 mt-3">
-              CRM система нового поколения
+            <p className="login-subtitle">
+              CRM система для профессиональных риелторов
             </p>
-          </div>
 
-          <div className="space-y-4">
-            <input className="modern-input" placeholder="Имя" />
-            <input className="modern-input" placeholder="Телефон" />
-            <input className="modern-input" placeholder="Email" />
-            <input className="modern-input" placeholder="Пароль" />
+            <div className="login-form">
+              <input
+                className="modern-input"
+                placeholder="Имя агента"
+              />
 
-            <button className="primary-btn w-full">
-              Войти в систему
-            </button>
-          </div>
-        </motion.div>
-      </section>
+              <input
+                className="modern-input"
+                placeholder="Номер телефона"
+              />
 
-      <section className="dashboard-layout">
-        <aside className="sidebar hidden lg:flex">
-          <div>
-            <div className="logo-box mb-10">
-              <Building2 size={28} />
+              <button
+                className="primary-btn"
+                onClick={() => setLoggedIn(true)}
+              >
+                ВОЙТИ В СИСТЕМУ
+              </button>
             </div>
-
-            <nav className="space-y-3">
-              <button className="nav-btn active">
-                <LayoutDashboard size={18} /> Главная
-              </button>
-
-              <button className="nav-btn">
-                <Building2 size={18} /> Объекты
-              </button>
-
-              <button className="nav-btn">
-                <Users size={18} /> Клиенты
-              </button>
-
-              <button className="nav-btn">
-                <Wallet size={18} /> Сделки
-              </button>
-            </nav>
           </div>
-
-          <button className="nav-btn">
-            <Settings size={18} /> Настройки
-          </button>
-        </aside>
-
-        <div className="flex-1">
+        </section>
+      ) : (
+        <section className="dashboard-screen">
           <header className="topbar glass">
-            <div>
-              <h2 className="text-4xl font-black tracking-tight">
-                Dashboard
-              </h2>
+            <h1 className="crm-title">NOVA CRM</h1>
 
-              <p className="text-slate-500 mt-1">
-                Управление недвижимостью
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="search-box hidden md:flex">
-                <Search size={18} />
-                <input placeholder="Поиск" />
-              </div>
-
-              <button className="circle-btn">
+            <div className="topbar-actions">
+              <button className="icon-btn">
                 <Bell size={18} />
               </button>
 
-              <div className="avatar"></div>
+              <button className="icon-btn">
+                <User size={18} />
+              </button>
             </div>
           </header>
 
-          <div className="stats-grid mt-8">
-            {stats.map((item, index) => {
-              const Icon = item.icon
+          {activeTab === 'home' && (
+            <>
+              <div className="section-title">
+                СТАТИСТИКА АГЕНТА
+              </div>
 
-              return (
-                <motion.div
-                  key={index}
-                  whileHover={{ y: -5 }}
-                  className="glass stat-card"
-                >
+              <div className="stats-grid">
+                <div className="stat-card glass">
                   <div>
-                    <p className="text-slate-500">{item.title}</p>
-                    <h3 className="text-4xl font-black mt-2">
-                      {item.value}
-                    </h3>
+                    <p>Всего покупателей</p>
+                    <h2>24</h2>
                   </div>
+                </div>
 
-                  <div className="icon-wrap">
-                    <Icon size={22} />
+                <div className="stat-card glass">
+                  <div>
+                    <p>Всего продавцов</p>
+                    <h2>18</h2>
                   </div>
-                </motion.div>
-              )
-            })}
-          </div>
+                </div>
 
-          <div className="grid xl:grid-cols-2 gap-6 mt-8">
-            <div className="glass panel p-6">
-              <div className="flex items-center justify-between mb-6">
+                <div className="stat-card glass">
+                  <div>
+                    <p>Совпадений</p>
+                    <h2>112</h2>
+                  </div>
+                </div>
+              </div>
+
+              <div className="section-title mt">
+                АНАЛИТИКА
+              </div>
+
+              <div className="analytics-card glass">
                 <div>
-                  <h3 className="text-2xl font-bold">Аналитика</h3>
-                  <p className="text-slate-500 mt-1">Статистика за месяц</p>
+                  <h2>78%</h2>
+                  <p>Эффективность подбора</p>
                 </div>
 
-                <div className="badge">+18%</div>
+                <div className="chart-bars">
+                  {[40, 70, 50, 90, 65, 85, 55].map((h, i) => (
+                    <div
+                      key={i}
+                      style={{ height: `${h}%` }}
+                      className="bar"
+                    />
+                  ))}
+                </div>
               </div>
 
-              <div className="chart-wrap">
-                {[45, 65, 35, 90, 70, 55, 95, 60].map((h, i) => (
-                  <div
-                    key={i}
-                    style={{ height: `${h}%` }}
-                    className="chart-bar"
-                  ></div>
-                ))}
-              </div>
-            </div>
-
-            <div className="glass panel p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold">AI Matching</h3>
-                <TrendingUp />
+              <div className="section-title mt">
+                ЛУЧШИЕ АГЕНТЫ
               </div>
 
-              <div className="space-y-5">
+              <div className="glass agents-card">
+                <div className="agent-item">
+                  <div className="agent-avatar"></div>
+
+                  <div>
+                    <h3>Alexander Wolf</h3>
+                    <p>28 listings</p>
+                  </div>
+                </div>
+
+                <div className="agent-item">
+                  <div className="agent-avatar"></div>
+
+                  <div>
+                    <h3>Emma Carter</h3>
+                    <p>24 listings</p>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'objects' && (
+            <>
+              <div className="objects-header">
                 <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Skyline Residence</span>
-                    <span>92%</span>
-                  </div>
-
-                  <div className="progress-line">
-                    <div style={{ width: '92%' }}></div>
-                  </div>
+                  <h2 className="page-title">Объекты</h2>
+                  <p className="page-subtitle">
+                    Управление недвижимостью
+                  </p>
                 </div>
-
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Modern Penthouse</span>
-                    <span>81%</span>
-                  </div>
-
-                  <div className="progress-line">
-                    <div style={{ width: '81%' }}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between mt-10 mb-5">
-            <div>
-              <h3 className="text-3xl font-black">Объекты</h3>
-              <p className="text-slate-500 mt-1">Управление недвижимостью</p>
-            </div>
-
-            <button
-              className="primary-btn"
-              onClick={() => setShowModal(true)}
-            >
-              <Plus size={18} /> Добавить объект
-            </button>
-          </div>
-
-          <div className="property-grid">
-            {properties.map((property) => (
-              <motion.div
-                key={property.id}
-                whileHover={{ y: -5 }}
-                className="glass property-card"
-              >
-                <img
-                  src={property.image}
-                  alt={property.title}
-                  className="property-image"
-                />
-
-                <div className="p-5">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-2xl font-bold">
-                      {property.title}
-                    </h4>
-
-                    <span className="badge">Premium</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-slate-500 mt-2">
-                    <MapPin size={16} /> {property.city}
-                  </div>
-
-                  <div className="flex gap-5 mt-5 text-sm text-slate-600">
-                    <div className="flex items-center gap-2">
-                      <BedDouble size={16} />
-                      {property.rooms} комнат
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Maximize size={16} />
-                      {property.area} м²
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-6">
-                    <span className="text-3xl font-black">
-                      {property.price}
-                    </span>
-
-                    <button className="secondary-btn">
-                      Подробнее
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="grid xl:grid-cols-2 gap-6 mt-10">
-            <div className="glass panel p-6">
-              <h3 className="text-2xl font-bold mb-5">Клиенты</h3>
-
-              <div className="space-y-4">
-                {clients.map((client, index) => (
-                  <div key={index} className="client-item">
-                    <div className="avatar small"></div>
-
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{client.name}</h4>
-                      <div className="text-slate-500 text-sm mt-1">
-                        {client.status}
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <button className="circle-btn small">
-                        <Phone size={14} />
-                      </button>
-
-                      <button className="circle-btn small">
-                        <Mail size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <AnimatePresence>
-        {showModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="modal-overlay"
-          >
-            <motion.div
-              initial={{ y: 60, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 60, opacity: 0 }}
-              className="glass modal-box"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-3xl font-black">Добавить объект</h3>
 
                 <button
-                  className="circle-btn"
-                  onClick={() => setShowModal(false)}
+                  className="add-btn"
+                  onClick={() => setShowAddObject(true)}
                 >
-                  <X size={18} />
+                  <Plus size={18} />
                 </button>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <input className="modern-input" placeholder="Название" />
-                <input className="modern-input" placeholder="Цена" />
-                <input className="modern-input" placeholder="Город" />
-                <input className="modern-input" placeholder="Адрес" />
-                <input className="modern-input" placeholder="Комнаты" />
-                <input className="modern-input" placeholder="Площадь м²" />
-                <input className="modern-input" placeholder="Этаж" />
-                <input className="modern-input" placeholder="Тип недвижимости" />
+              <div className="search-box glass">
+                <Search size={18} />
+                <input placeholder="Поиск объекта" />
               </div>
 
-              <textarea
-                className="modern-input mt-4 min-h-[120px]"
-                placeholder="Описание"
-              ></textarea>
+              <div className="object-card glass">
+                <img
+                  src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1200&auto=format&fit=crop"
+                  className="object-image"
+                />
 
-              <button className="primary-btn w-full mt-5">
-                Сохранить объект
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                <div className="object-content">
+                  <h3>Premium Apartment</h3>
+                  <p>Berlin • 148м² • 4 комнаты</p>
+                  <h2>€890,000</h2>
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'clients' && (
+            <>
+              <h2 className="page-title">Клиенты</h2>
+
+              <div className="glass client-card">
+                <h3>Alexander Wolf</h3>
+                <p>Покупатель</p>
+                <span>+49 151 000 000</span>
+              </div>
+
+              <div className="glass client-card">
+                <h3>Emma Carter</h3>
+                <p>Продавец</p>
+                <span>+49 151 111 111</span>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'registry' && (
+            <>
+              <h2 className="page-title">Реестр</h2>
+
+              <div className="glass registry-card">
+                <h3>Последние сделки</h3>
+
+                <div className="registry-item">
+                  <span>Berlin Apartment</span>
+                  <strong>Успешно</strong>
+                </div>
+
+                <div className="registry-item">
+                  <span>Luxury House</span>
+                  <strong>В процессе</strong>
+                </div>
+              </div>
+            </>
+          )}
+
+          <nav className="bottom-nav glass">
+            <button
+              className={activeTab === 'home' ? 'nav-item active' : 'nav-item'}
+              onClick={() => setActiveTab('home')}
+            >
+              <Home size={22} />
+              <span>Главная</span>
+            </button>
+
+            <button
+              className={activeTab === 'objects' ? 'nav-item active' : 'nav-item'}
+              onClick={() => setActiveTab('objects')}
+            >
+              <Building2 size={22} />
+              <span>Объекты</span>
+            </button>
+
+            <button
+              className={activeTab === 'clients' ? 'nav-item active' : 'nav-item'}
+              onClick={() => setActiveTab('clients')}
+            >
+              <Users size={22} />
+              <span>Клиенты</span>
+            </button>
+
+            <button
+              className={activeTab === 'registry' ? 'nav-item active' : 'nav-item'}
+              onClick={() => setActiveTab('registry')}
+            >
+              <ClipboardList size={22} />
+              <span>Реестр</span>
+            </button>
+          </nav>
+
+          {showAddObject && (
+            <div className="modal-overlay">
+              <div className="modal-box glass">
+                <div className="modal-top">
+                  <h2>Добавить объект</h2>
+
+                  <button
+                    className="icon-btn"
+                    onClick={() => setShowAddObject(false)}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div className="modal-form">
+                  <input className="modern-input" placeholder="Название" />
+                  <input className="modern-input" placeholder="Цена" />
+                  <input className="modern-input" placeholder="Комнаты" />
+                  <input className="modern-input" placeholder="Кв²" />
+                  <input className="modern-input" placeholder="Адрес" />
+
+                  <button className="primary-btn">
+                    Сохранить объект
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
     </main>
   )
-            }
+}

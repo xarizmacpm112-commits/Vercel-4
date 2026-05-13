@@ -23,13 +23,20 @@ export default function HomePage() {
   const [agentName, setAgentName] = useState('')
   const [agentPhone, setAgentPhone] = useState('')
 
+  // Функция для форматирования чисел с пробелами: 1 000 000
+  const formatNumber = (val) => {
+    if (!val) return ''
+    let number = val.toString().replace(/\s/g, '')
+    return number.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+  }
+
   // База данных
   const [objects, setObjects] = useState([
-    { id: 1, type: 'Квартира', price: '450000', rooms: '3', area: '85', floor: '4', district: 'Ленинский', address: 'Main Street 21', agent: 'Alexander' }
+    { id: 1, type: 'Квартира', price: '8500000', rooms: '3', area: '85', floor: '4', district: 'Ленинский', address: 'ул. Пушкина, 10', agent: 'Alexander' }
   ])
 
   const [clients, setClients] = useState([
-    { id: 1, propertyType: 'Квартира', budgetFrom: '300000', budgetTo: '500000', roomsFrom: '2', roomsTo: '4', floorFrom: '1', floorTo: '6', areaFrom: '60', areaTo: '120', district: 'Кировский', address: 'Center 1', agent: 'Alexander' }
+    { id: 1, propertyType: 'Квартира', budgetFrom: '5000000', budgetTo: '9500000', roomsFrom: '2', roomsTo: '4', floorFrom: '1', floorTo: '6', areaFrom: '60', areaTo: '120', district: 'Кировский', address: 'Центр 1', agent: 'Alexander' }
   ])
 
   // Формы добавления
@@ -55,7 +62,7 @@ export default function HomePage() {
         <div className="login-card">
           <h1>B2B GARANT</h1>
           <input placeholder="Имя агента" value={agentName} onChange={e => setAgentName(e.target.value)} />
-          <input placeholder="Номер телефона" value={agentPhone} onChange={e => setAgentPhone(e.target.value)} />
+          <input placeholder="+7 (___) ___-__-__" value={agentPhone} onChange={e => setAgentPhone(e.target.value)} />
           <button onClick={() => { if (agentName && agentPhone) setLoggedIn(true) }}>ВОЙТИ</button>
         </div>
       </main>
@@ -121,7 +128,12 @@ export default function HomePage() {
               <select className="form-input" value={newObject.type} onChange={e => setNewObject({...newObject, type: e.target.value})}>
                 <option>Квартира</option><option>Дом</option>
               </select>
-              <input className="form-input" placeholder="Цена" value={newObject.price} onChange={e => setNewObject({...newObject, price: e.target.value})} />
+              <input 
+                className="form-input" 
+                placeholder="Цена (₽)" 
+                value={formatNumber(newObject.price)} 
+                onChange={e => setNewObject({...newObject, price: e.target.value.replace(/\s/g, '')})} 
+              />
               <input className="form-input" placeholder="Кв²" value={newObject.area} onChange={e => setNewObject({...newObject, area: e.target.value})} />
               <input className="form-input" placeholder="Комнаты" value={newObject.rooms} onChange={e => setNewObject({...newObject, rooms: e.target.value})} />
               <input className="form-input" placeholder="Этаж" value={newObject.floor} onChange={e => setNewObject({...newObject, floor: e.target.value})} />
@@ -141,7 +153,10 @@ export default function HomePage() {
             <h2>Заявка покупателя</h2>
             <div className="form-stack">
               <select className="form-input" value={newClient.propertyType} onChange={e => setNewClient({...newClient, propertyType: e.target.value})}><option>Квартира</option><option>Дом</option></select>
-              <div className="dual-input"><input className="form-input" placeholder="Цена от" onChange={e => setNewClient({...newClient, budgetFrom: e.target.value})} /><input className="form-input" placeholder="Цена до" onChange={e => setNewClient({...newClient, budgetTo: e.target.value})} /></div>
+              <div className="dual-input">
+                <input className="form-input" placeholder="Цена от (₽)" value={formatNumber(newClient.budgetFrom)} onChange={e => setNewClient({...newClient, budgetFrom: e.target.value.replace(/\s/g, '')})} />
+                <input className="form-input" placeholder="Цена до (₽)" value={formatNumber(newClient.budgetTo)} onChange={e => setNewClient({...newClient, budgetTo: e.target.value.replace(/\s/g, '')})} />
+              </div>
               <div className="dual-input"><input className="form-input" placeholder="Кв² от" onChange={e => setNewClient({...newClient, areaFrom: e.target.value})} /><input className="form-input" placeholder="Кв² до" onChange={e => setNewClient({...newClient, areaTo: e.target.value})} /></div>
               <div className="dual-input"><input className="form-input" placeholder="Комнат от" onChange={e => setNewClient({...newClient, roomsFrom: e.target.value})} /><input className="form-input" placeholder="Комнат до" onChange={e => setNewClient({...newClient, roomsTo: e.target.value})} /></div>
               <div className="dual-input"><input className="form-input" placeholder="Этаж от" onChange={e => setNewClient({...newClient, floorFrom: e.target.value})} /><input className="form-input" placeholder="Этаж до" onChange={e => setNewClient({...newClient, floorTo: e.target.value})} /></div>
@@ -174,7 +189,10 @@ export default function HomePage() {
                   <div className="expanded-filter-panel">
                     <div className="filter-fields">
                       <select className="form-input"><option>Все типы</option><option>Квартира</option><option>Дом</option></select>
-                      <div className="dual-input"><input className="form-input" placeholder="Цена от" /><input className="form-input" placeholder="Цена до" /></div>
+                      <div className="dual-input">
+                        <input className="form-input" placeholder="Цена от" />
+                        <input className="form-input" placeholder="Цена до" />
+                      </div>
                       <div className="dual-input"><input className="form-input" placeholder="Комнаты от" /><input className="form-input" placeholder="Комнаты до" /></div>
                       <div className="dual-input"><input className="form-input" placeholder="Этаж от" /><input className="form-input" placeholder="Этаж до" /></div>
                       <select className="form-input">
@@ -194,18 +212,18 @@ export default function HomePage() {
               {registryTab === 'objects' && objects.map(obj => (
                 <div className="registry-card" key={obj.id}>
                   <h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p>
-                  <p>{obj.district}, {obj.address}</p><strong>€ {obj.price}</strong><span>{obj.agent}</span>
+                  <p>{obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><span>{obj.agent}</span>
                 </div>
               ))}
               {registryTab === 'clients' && clients.map(cl => (
                 <div className="registry-card" key={cl.id}>
-                  <h3>Поиск: {cl.propertyType}</h3><p>Бюджет: € {cl.budgetFrom} - {cl.budgetTo}</p>
+                  <h3>Поиск: {cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetFrom)} - {formatNumber(cl.budgetTo)} ₽</p>
                   <p>{cl.roomsFrom}-{cl.roomsTo} комн • Этаж {cl.floorFrom}-{cl.floorTo}</p>
                   <p>{cl.district}, {cl.address}</p><span>{cl.agent}</span>
                 </div>
               ))}
               {registryTab === 'agents' && (
-                <div className="registry-card"><h3>Alexander</h3><p>Объекты: 8 • Клиенты: 12</p><span>+49 111 111</span></div>
+                <div className="registry-card"><h3>Alexander</h3><p>Объекты: 8 • Клиенты: 12</p><span>+7 (999) 000-00-00</span></div>
               )}
             </div>
           </>
@@ -267,4 +285,5 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-              }
+                                                                                         }
+                    

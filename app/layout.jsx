@@ -1,8 +1,8 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'NovaCRM',
-  description: 'Modern Real Estate CRM Dashboard'
+  title: 'B2B GARANT CRM',
+  description: 'CRM для риелторов'
 }
 
 export default function RootLayout({ children }) {

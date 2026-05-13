@@ -23,16 +23,16 @@ export default function HomePage() {
   const [agentName, setAgentName] = useState('')
   const [agentPhone, setAgentPhone] = useState('')
 
-  // Данные
+  // База данных
   const [objects, setObjects] = useState([
     { id: 1, type: 'Квартира', price: '450000', rooms: '3', area: '85', floor: '4', district: 'Frankfurt Center', address: 'Main Street 21', agent: 'Alexander' }
   ])
 
   const [clients, setClients] = useState([
-    { id: 1, propertyType: 'Квартира', budgetFrom: '300000', budgetTo: '500000', roomsFrom: '2', roomsTo: '4', floorFrom: '1', floorTo: '6', areaFrom: '60', areaTo: '120', district: 'Frankfurt Center', address: 'Main Street 21', agent: 'Alexander' }
+    { id: 1, propertyType: 'Квартира', budgetFrom: '300000', budgetTo: '500000', roomsFrom: '2', roomsTo: '4', floorFrom: '1', floorTo: '6', areaFrom: '60', areaTo: '120', district: 'Frankfurt Center', address: 'Center 1', agent: 'Alexander' }
   ])
 
-  // Состояния форм добавления
+  // Формы добавления
   const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: '', address: '' })
   const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: '', address: '' })
 
@@ -54,7 +54,6 @@ export default function HomePage() {
       <main className="login-page">
         <div className="login-card">
           <h1>B2B GARANT</h1>
-          <p>CRM система для риелторов</p>
           <input placeholder="Имя агента" value={agentName} onChange={e => setAgentName(e.target.value)} />
           <input placeholder="Номер телефона" value={agentPhone} onChange={e => setAgentPhone(e.target.value)} />
           <button onClick={() => { if (agentName && agentPhone) setLoggedIn(true) }}>ВОЙТИ</button>
@@ -68,7 +67,6 @@ export default function HomePage() {
       <header className="topbar">
         <div>
           <h1>B2B GARANT</h1>
-          <p>CRM система</p>
         </div>
         <button className="profile-btn"><User size={20} /></button>
       </header>
@@ -79,16 +77,16 @@ export default function HomePage() {
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
               <div>
-                <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#666', marginBottom: '8px' }}>МОИ ПОКАЗАТЕЛИ</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                <p className="group-label">МОИ ПОКАЗАТЕЛИ</p>
+                <div className="stats-grid-3">
                   <div className="stat-box-simple"><h3>{clients.length}</h3><span>Клиенты</span></div>
                   <div className="stat-box-simple"><h3>{objects.length}</h3><span>Объекты</span></div>
                   <div className="stat-box-simple"><h3>0</h3><span>Матчи</span></div>
                 </div>
               </div>
               <div>
-                <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#666', marginBottom: '8px' }}>КОМПАНИЯ</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                <p className="group-label">КОМПАНИЯ</p>
+                <div className="stats-grid-3">
                   <div className="stat-box-simple"><h3>124</h3><span>Клиенты</span></div>
                   <div className="stat-box-simple"><h3>86</h3><span>Объекты</span></div>
                   <div className="stat-box-simple"><h3>12</h3><span>Агенты</span></div>
@@ -118,8 +116,8 @@ export default function HomePage() {
 
         {activeTab === 'objects' && (
           <div className="form-container">
-            <h2 style={{ marginBottom: '15px' }}>Выставить объект</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <h2>Выставить объект</h2>
+            <div className="form-stack">
               <select className="form-input" value={newObject.type} onChange={e => setNewObject({...newObject, type: e.target.value})}>
                 <option>Квартира</option><option>Дом</option>
               </select>
@@ -136,8 +134,8 @@ export default function HomePage() {
 
         {activeTab === 'clients' && (
           <div className="form-container">
-            <h2 style={{ marginBottom: '15px' }}>Заявка покупателя</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <h2>Заявка покупателя</h2>
+            <div className="form-stack">
               <select className="form-input" value={newClient.propertyType} onChange={e => setNewClient({...newClient, propertyType: e.target.value})}><option>Квартира</option><option>Дом</option></select>
               <div className="dual-input"><input className="form-input" placeholder="Цена от" onChange={e => setNewClient({...newClient, budgetFrom: e.target.value})} /><input className="form-input" placeholder="Цена до" onChange={e => setNewClient({...newClient, budgetTo: e.target.value})} /></div>
               <div className="dual-input"><input className="form-input" placeholder="Кв² от" onChange={e => setNewClient({...newClient, areaFrom: e.target.value})} /><input className="form-input" placeholder="Кв² до" onChange={e => setNewClient({...newClient, areaTo: e.target.value})} /></div>
@@ -161,29 +159,19 @@ export default function HomePage() {
             {registryTab !== 'agents' && (
               <div className="registry-filter-container">
                 <button className="filter-toggle-btn" onClick={() => setShowFilters(!showFilters)}>
-                   <Search size={16} /> Поиск и фильтры {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                   <Search size={16} /> Поиск {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
 
                 {showFilters && (
                   <div className="expanded-filter-panel">
-                    {registryTab === 'objects' ? (
-                      <div className="filter-fields">
-                        <select className="form-input"><option>Все типы</option><option>Квартира</option><option>Дом</option></select>
-                        <div className="dual-input"><input className="form-input" placeholder="Цена от" /><input className="form-input" placeholder="Цена до" /></div>
-                        <div className="dual-input"><input className="form-input" placeholder="Кв² от" /><input className="form-input" placeholder="Кв² до" /></div>
-                        <div className="dual-input"><input className="form-input" placeholder="Комнат от" /><input className="form-input" placeholder="Комнат до" /></div>
-                        <input className="form-input" placeholder="Район" />
-                        <button className="save-btn" onClick={() => setShowFilters(false)}>НАЙТИ ОБЪЕКТ</button>
-                      </div>
-                    ) : (
-                      <div className="filter-fields">
-                        <select className="form-input"><option>Все типы</option><option>Квартира</option><option>Дом</option></select>
-                        <div className="dual-input"><input className="form-input" placeholder="Бюджет от" /><input className="form-input" placeholder="Бюджет до" /></div>
-                        <div className="dual-input"><input className="form-input" placeholder="Кв² от" /><input className="form-input" placeholder="Кв² до" /></div>
-                        <input className="form-input" placeholder="Район" />
-                        <button className="save-btn" onClick={() => setShowFilters(false)}>НАЙТИ КЛИЕНТА</button>
-                      </div>
-                    )}
+                    <div className="filter-fields">
+                      <select className="form-input"><option>Все типы</option><option>Квартира</option><option>Дом</option></select>
+                      <div className="dual-input"><input className="form-input" placeholder="Цена от" /><input className="form-input" placeholder="Цена до" /></div>
+                      <div className="dual-input"><input className="form-input" placeholder="Комнаты от" /><input className="form-input" placeholder="Комнаты до" /></div>
+                      <div className="dual-input"><input className="form-input" placeholder="Этаж от" /><input className="form-input" placeholder="Этаж до" /></div>
+                      <input className="form-input" placeholder="Район" />
+                      <button className="save-btn" onClick={() => setShowFilters(false)}>НАЙТИ</button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -192,15 +180,15 @@ export default function HomePage() {
             <div className="list-section">
               {registryTab === 'objects' && objects.map(obj => (
                 <div className="registry-card" key={obj.id}>
-                  <h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • {obj.district}</p>
-                  <p>{obj.address}</p><strong>€ {obj.price}</strong><span>{obj.agent}</span>
+                  <h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p>
+                  <p>{obj.district}, {obj.address}</p><strong>€ {obj.price}</strong><span>{obj.agent}</span>
                 </div>
               ))}
               {registryTab === 'clients' && clients.map(cl => (
                 <div className="registry-card" key={cl.id}>
                   <h3>Поиск: {cl.propertyType}</h3><p>Бюджет: € {cl.budgetFrom} - {cl.budgetTo}</p>
-                  <p>{cl.roomsFrom}-{cl.roomsTo} комн • {cl.district}</p>
-                  <p>{cl.address}</p><span>{cl.agent}</span>
+                  <p>{cl.roomsFrom}-{cl.roomsTo} комн • Этаж {cl.floorFrom}-{cl.floorTo}</p>
+                  <p>{cl.district}, {cl.address}</p><span>{cl.agent}</span>
                 </div>
               ))}
               {registryTab === 'agents' && (
@@ -219,6 +207,8 @@ export default function HomePage() {
       </nav>
 
       <style jsx>{`
+        .group-label { fontSize: 12px; fontWeight: bold; color: #666; marginBottom: 8px; text-transform: uppercase; }
+        .stats-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .stat-box-simple { border: 1px solid #eee; padding: 10px; border-radius: 12px; text-align: center; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .stat-box-simple h3 { margin: 0; font-size: 18px; }
         .stat-box-simple span { font-size: 10px; color: #888; text-transform: uppercase; }
@@ -226,10 +216,10 @@ export default function HomePage() {
         .agent-rank-card { display: flex; align-items: center; background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #eee; }
         
         .form-container { background: #fff; padding: 20px; border-radius: 15px; border: 1px solid #eee; }
+        .form-stack { display: flex; flex-direction: column; gap: 10px; }
         .form-input { padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; width: 100%; outline: none; background: #f9f9f9; }
         .dual-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; border: none; width: 100%; transition: 0.2s; }
-        .save-btn:active { opacity: 0.7; }
+        .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; border: none; width: 100%; }
         
         .registry-nav { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         .reg-btn { padding: 12px; border: 1px solid #000; border-radius: 8px; background: transparent; font-weight: bold; cursor: pointer; transition: 0.3s; }
@@ -237,7 +227,7 @@ export default function HomePage() {
         
         .registry-filter-container { margin-bottom: 15px; }
         .filter-toggle-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; cursor: pointer; }
-        .expanded-filter-panel { background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 0 0 12px 12px; border-top: none; display: flex; flex-direction: column; gap: 10px; }
+        .expanded-filter-panel { background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 0 0 12px 12px; border-top: none; }
         .filter-fields { display: flex; flex-direction: column; gap: 10px; }
 
         .registry-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; position: relative; }
@@ -248,5 +238,5 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-        }
-          
+      }
+                                                        

@@ -7,10 +7,11 @@ import {
   Users,
   ClipboardList,
   Search,
-  ChevronDown,
-  ChevronUp,
+  User,
   Trophy,
-  Medal
+  Medal,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 
 export default function HomePage() {
@@ -22,23 +23,16 @@ export default function HomePage() {
   const [agentName, setAgentName] = useState('')
   const [agentPhone, setAgentPhone] = useState('')
 
-  // Функция для красивого вывода цены: 10 000 000
-  const formatPrice = (val) => {
-    if (!val) return ''
-    let number = val.toString().replace(/\s/g, '')
-    return number.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
-  }
-
   // База данных
   const [objects, setObjects] = useState([
-    { id: 1, type: 'Квартира', price: '8500000', rooms: '3', area: '85', floor: '4', district: 'Ленинский', address: 'ул. Пушкина, 10', agent: 'Александр' }
+    { id: 1, type: 'Квартира', price: '450000', rooms: '3', area: '85', floor: '4', district: 'Ленинский', address: 'Main Street 21', agent: 'Alexander' }
   ])
 
   const [clients, setClients] = useState([
-    { id: 1, propertyType: 'Квартира', budgetFrom: '5000000', budgetTo: '9500000', roomsFrom: '2', roomsTo: '4', floorFrom: '1', floorTo: '10', areaFrom: '40', areaTo: '100', district: 'Кировский', address: 'Центр', agent: 'Александр' }
+    { id: 1, propertyType: 'Квартира', budgetFrom: '300000', budgetTo: '500000', roomsFrom: '2', roomsTo: '4', floorFrom: '1', floorTo: '6', areaFrom: '60', areaTo: '120', district: 'Кировский', address: 'Center 1', agent: 'Alexander' }
   ])
 
-  // Состояния форм
+  // Формы добавления
   const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
   const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
 
@@ -52,17 +46,17 @@ export default function HomePage() {
   const addClient = () => {
     setClients([...clients, { id: Date.now(), ...newClient, agent: agentName }]);
     setNewClient({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' });
-    alert("Заявка сохранена");
+    alert("Заявка клиента сохранена");
   }
 
   if (!loggedIn) {
     return (
       <main className="login-page">
-        <div className="login-card glass">
-          <h1 className="gold-text">B2B GARANT</h1>
-          <input className="gold-input" placeholder="Имя агента" value={agentName} onChange={e => setAgentName(e.target.value)} />
-          <input className="gold-input" placeholder="Номер телефона (+7...)" value={agentPhone} onChange={e => setAgentPhone(e.target.value)} />
-          <button className="gold-btn" onClick={() => { if (agentName && agentPhone) setLoggedIn(true) }}>ВОЙТИ</button>
+        <div className="login-card">
+          <h1>B2B GARANT</h1>
+          <input placeholder="Имя агента" value={agentName} onChange={e => setAgentName(e.target.value)} />
+          <input placeholder="Номер телефона" value={agentPhone} onChange={e => setAgentPhone(e.target.value)} />
+          <button onClick={() => { if (agentName && agentPhone) setLoggedIn(true) }}>ВОЙТИ</button>
         </div>
       </main>
     )
@@ -71,223 +65,206 @@ export default function HomePage() {
   return (
     <main className="crm-container">
       <header className="topbar">
-        <h1 className="gold-text">B2B GARANT</h1>
+        <div>
+          <h1>B2B GARANT</h1>
+        </div>
+        <button className="profile-btn"><User size={20} /></button>
       </header>
 
-      <section className="content">
+      <section className="content" style={{ paddingBottom: '100px' }}>
         
         {activeTab === 'home' && (
-          <div className="home-layout">
-            <div className="stats-section">
-              <p className="section-label">АНАЛИТИКА</p>
-              <div className="stats-grid">
-                <div className="stat-card glass"><h3>{clients.length}</h3><span>Клиенты</span></div>
-                <div className="stat-card glass"><h3>{objects.length}</h3><span>Объекты</span></div>
-                <div className="stat-card glass"><h3>0</h3><span>Сделки</span></div>
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
+              <div>
+                <p className="group-label">МОИ ПОКАЗАТЕЛИ</p>
+                <div className="stats-grid-3">
+                  <div className="stat-box-simple"><h3>{clients.length}</h3><span>Клиенты</span></div>
+                  <div className="stat-box-simple"><h3>{objects.length}</h3><span>Объекты</span></div>
+                  <div className="stat-box-simple"><h3>0</h3><span>Матчи</span></div>
+                </div>
+              </div>
+              <div>
+                <p className="group-label">КОМПАНИЯ</p>
+                <div className="stats-grid-3">
+                  <div className="stat-box-simple"><h3>124</h3><span>Клиенты</span></div>
+                  <div className="stat-box-simple"><h3>86</h3><span>Объекты</span></div>
+                  <div className="stat-box-simple"><h3>12</h3><span>Агенты</span></div>
+                </div>
               </div>
             </div>
 
-            <div className="rating-section glass">
-              <p className="section-label"><Trophy size={14} /> ТОП АГЕНТОВ</p>
-              {['Александр', 'Елена', 'Дмитрий'].map((name, i) => (
-                <div key={name} className="rank-item">
-                  <span className="rank-num">{i + 1}</span>
-                  <div className="rank-info"><b>{name}</b></div>
-                  <Medal size={18} className="gold-text" />
+            <div className="agents-section">
+              <div className="section-title"><Trophy size={18} /> Лучшие агенты</div>
+              {[ 
+                { name: 'Alexander', b: 12, s: 8, color: '#FFD700' },
+                { name: 'Emma', b: 9, s: 7, color: '#C0C0C0' },
+                { name: 'Daniel', b: 8, s: 6, color: '#CD7F32' }
+              ].map((agent, index) => (
+                <div key={agent.name} className="agent-rank-card">
+                  <div style={{ width: '30px', fontWeight: 'bold', color: agent.color }}>{index + 1}</div>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>{agent.name}</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>{agent.b} клиентов • {agent.s} объектов</p>
+                  </div>
+                  <Medal size={20} color={agent.color} />
                 </div>
               ))}
+            </div>
+          </>
+        )}
+
+        {activeTab === 'objects' && (
+          <div className="form-container">
+            <h2>Выставить объект</h2>
+            <div className="form-stack">
+              <select className="form-input" value={newObject.type} onChange={e => setNewObject({...newObject, type: e.target.value})}>
+                <option>Квартира</option><option>Дом</option>
+              </select>
+              <input className="form-input" placeholder="Цена" value={newObject.price} onChange={e => setNewObject({...newObject, price: e.target.value})} />
+              <input className="form-input" placeholder="Кв²" value={newObject.area} onChange={e => setNewObject({...newObject, area: e.target.value})} />
+              <input className="form-input" placeholder="Комнаты" value={newObject.rooms} onChange={e => setNewObject({...newObject, rooms: e.target.value})} />
+              <input className="form-input" placeholder="Этаж" value={newObject.floor} onChange={e => setNewObject({...newObject, floor: e.target.value})} />
+              <select className="form-input" value={newObject.district} onChange={e => setNewObject({...newObject, district: e.target.value})}>
+                <option>Ленинский</option>
+                <option>Кировский</option>
+                <option>Московский</option>
+              </select>
+              <input className="form-input" placeholder="Адрес" value={newObject.address} onChange={e => setNewObject({...newObject, address: e.target.value})} />
+              <button className="save-btn" onClick={addObject}>ОПУБЛИКОВАТЬ</button>
             </div>
           </div>
         )}
 
-        {(activeTab === 'objects' || activeTab === 'clients') && (
-          <div className="form-container glass">
-            <h2 className="gold-text">{activeTab === 'objects' ? 'Новый объект' : 'Поиск покупателя'}</h2>
+        {activeTab === 'clients' && (
+          <div className="form-container">
+            <h2>Заявка покупателя</h2>
             <div className="form-stack">
-              {activeTab === 'objects' ? (
-                <>
-                  <select className="gold-input" value={newObject.type} onChange={e => setNewObject({...newObject, type: e.target.value})}><option>Квартира</option><option>Дом</option></select>
-                  <input className="gold-input" placeholder="Цена (₽)" value={formatPrice(newObject.price)} onChange={e => setNewObject({...newObject, price: e.target.value.replace(/\s/g, '')})} />
-                  <div className="dual-input">
-                    <input className="gold-input" placeholder="Площадь м²" value={newObject.area} onChange={e => setNewObject({...newObject, area: e.target.value})} />
-                    <input className="gold-input" placeholder="Комнат" value={newObject.rooms} onChange={e => setNewObject({...newObject, rooms: e.target.value})} />
-                  </div>
-                  <input className="gold-input" placeholder="Этаж" value={newObject.floor} onChange={e => setNewObject({...newObject, floor: e.target.value})} />
-                  <select className="gold-input" value={newObject.district} onChange={e => setNewObject({...newObject, district: e.target.value})}>
-                    <option>Ленинский</option><option>Кировский</option><option>Московский</option>
-                  </select>
-                  <input className="gold-input" placeholder="Адрес" value={newObject.address} onChange={e => setNewObject({...newObject, address: e.target.value})} />
-                  <button className="gold-btn" onClick={addObject}>ОПУБЛИКОВАТЬ</button>
-                </>
-              ) : (
-                <>
-                  <select className="gold-input" value={newClient.propertyType} onChange={e => setNewClient({...newClient, propertyType: e.target.value})}><option>Квартира</option><option>Дом</option></select>
-                  <div className="dual-input">
-                    <input className="gold-input" placeholder="Цена от" value={formatPrice(newClient.budgetFrom)} onChange={e => setNewClient({...newClient, budgetFrom: e.target.value.replace(/\s/g, '')})} />
-                    <input className="gold-input" placeholder="Цена до" value={formatPrice(newClient.budgetTo)} onChange={e => setNewClient({...newClient, budgetTo: e.target.value.replace(/\s/g, '')})} />
-                  </div>
-                  <div className="dual-input">
-                    <input className="gold-input" placeholder="м² от" value={newClient.areaFrom} onChange={e => setNewClient({...newClient, areaFrom: e.target.value})} />
-                    <input className="gold-input" placeholder="м² до" value={newClient.areaTo} onChange={e => setNewClient({...newClient, areaTo: e.target.value})} />
-                  </div>
-                  <div className="dual-input">
-                    <input className="gold-input" placeholder="Комнат от" value={newClient.roomsFrom} onChange={e => setNewClient({...newClient, roomsFrom: e.target.value})} />
-                    <input className="gold-input" placeholder="Комнат до" value={newClient.roomsTo} onChange={e => setNewClient({...newClient, roomsTo: e.target.value})} />
-                  </div>
-                  <div className="dual-input">
-                    <input className="gold-input" placeholder="Этаж от" value={newClient.floorFrom} onChange={e => setNewClient({...newClient, floorFrom: e.target.value})} />
-                    <input className="gold-input" placeholder="Этаж до" value={newClient.floorTo} onChange={e => setNewClient({...newClient, floorTo: e.target.value})} />
-                  </div>
-                  <select className="gold-input" value={newClient.district} onChange={e => setNewClient({...newClient, district: e.target.value})}>
-                    <option>Ленинский</option><option>Кировский</option><option>Московский</option>
-                  </select>
-                  <input className="gold-input" placeholder="Адрес (желаемый)" value={newClient.address} onChange={e => setNewClient({...newClient, address: e.target.value})} />
-                  <button className="gold-btn" onClick={addClient}>СОХРАНИТЬ ЗАЯВКУ</button>
-                </>
-              )}
+              <select className="form-input" value={newClient.propertyType} onChange={e => setNewClient({...newClient, propertyType: e.target.value})}><option>Квартира</option><option>Дом</option></select>
+              <div className="dual-input"><input className="form-input" placeholder="Цена от" onChange={e => setNewClient({...newClient, budgetFrom: e.target.value})} /><input className="form-input" placeholder="Цена до" onChange={e => setNewClient({...newClient, budgetTo: e.target.value})} /></div>
+              <div className="dual-input"><input className="form-input" placeholder="Кв² от" onChange={e => setNewClient({...newClient, areaFrom: e.target.value})} /><input className="form-input" placeholder="Кв² до" onChange={e => setNewClient({...newClient, areaTo: e.target.value})} /></div>
+              <div className="dual-input"><input className="form-input" placeholder="Комнат от" onChange={e => setNewClient({...newClient, roomsFrom: e.target.value})} /><input className="form-input" placeholder="Комнат до" onChange={e => setNewClient({...newClient, roomsTo: e.target.value})} /></div>
+              <div className="dual-input"><input className="form-input" placeholder="Этаж от" onChange={e => setNewClient({...newClient, floorFrom: e.target.value})} /><input className="form-input" placeholder="Этаж до" onChange={e => setNewClient({...newClient, floorTo: e.target.value})} /></div>
+              <select className="form-input" value={newClient.district} onChange={e => setNewClient({...newClient, district: e.target.value})}>
+                <option>Ленинский</option>
+                <option>Кировский</option>
+                <option>Московский</option>
+              </select>
+              <input className="form-input" placeholder="Адрес" onChange={e => setNewClient({...newClient, address: e.target.value})} />
+              <button className="save-btn" onClick={addClient}>СОХРАНИТЬ ЗАЯВКУ</button>
             </div>
           </div>
         )}
 
         {activeTab === 'registry' && (
-          <div className="registry-container">
-            <div className="registry-tabs glass">
-              <button className={registryTab === 'objects' ? 'reg-nav-btn active' : 'reg-nav-btn'} onClick={() => { setRegistryTab('objects'); setShowFilters(false); }}>Объекты</button>
-              <button className={registryTab === 'clients' ? 'reg-nav-btn active' : 'reg-nav-btn'} onClick={() => { setRegistryTab('clients'); setShowFilters(false); }}>Клиенты</button>
-              <button className={registryTab === 'agents' ? 'reg-nav-btn active' : 'reg-nav-btn'} onClick={() => { setRegistryTab('agents'); setShowFilters(false); }}>Агенты</button>
+          <>
+            <div className="registry-nav">
+              <button className={registryTab === 'objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('objects'); setShowFilters(false); }}>Объекты</button>
+              <button className={registryTab === 'clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('clients'); setShowFilters(false); }}>Клиенты</button>
+              <button className={registryTab === 'agents' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('agents'); setShowFilters(false); }}>Агенты</button>
             </div>
 
             {registryTab !== 'agents' && (
-              <div className="filter-dropdown">
-                <button className="filter-trigger glass" onClick={() => setShowFilters(!showFilters)}>
+              <div className="registry-filter-container">
+                <button className="filter-toggle-btn" onClick={() => setShowFilters(!showFilters)}>
                    <Search size={16} /> Поиск {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
+
                 {showFilters && (
-                  <div className="filter-panel glass animate-slide">
-                    <div className="form-stack">
-                      <div className="dual-input">
-                        <input className="gold-input" placeholder="Цена от" />
-                        <input className="gold-input" placeholder="Цена до" />
-                      </div>
-                      <div className="dual-input">
-                        <input className="gold-input" placeholder="м² от" />
-                        <input className="gold-input" placeholder="м² до" />
-                      </div>
-                      <div className="dual-input">
-                        <input className="gold-input" placeholder="Комнаты от" />
-                        <input className="gold-input" placeholder="Комнаты до" />
-                      </div>
-                      <div className="dual-input">
-                        <input className="gold-input" placeholder="Этаж от" />
-                        <input className="gold-input" placeholder="Этаж до" />
-                      </div>
-                      <select className="gold-input">
-                        <option>Все районы</option><option>Ленинский</option><option>Кировский</option><option>Московский</option>
+                  <div className="expanded-filter-panel">
+                    <div className="filter-fields">
+                      <select className="form-input"><option>Все типы</option><option>Квартира</option><option>Дом</option></select>
+                      <div className="dual-input"><input className="form-input" placeholder="Цена от" /><input className="form-input" placeholder="Цена до" /></div>
+                      <div className="dual-input"><input className="form-input" placeholder="Комнаты от" /><input className="form-input" placeholder="Комнаты до" /></div>
+                      <div className="dual-input"><input className="form-input" placeholder="Этаж от" /><input className="form-input" placeholder="Этаж до" /></div>
+                      <select className="form-input">
+                        <option>Все районы</option>
+                        <option>Ленинский</option>
+                        <option>Кировский</option>
+                        <option>Московский</option>
                       </select>
-                      <button className="gold-btn">НАЙТИ</button>
+                      <button className="save-btn" onClick={() => setShowFilters(false)}>НАЙТИ</button>
                     </div>
                   </div>
                 )}
               </div>
             )}
 
-            <div className="scroll-area">
+            <div className="list-section">
               {registryTab === 'objects' && objects.map(obj => (
-                <div className="item-card glass" key={obj.id}>
-                  <h3 className="gold-text">{obj.type} • {obj.area}м²</h3>
-                  <p>{obj.rooms} комн • Этаж {obj.floor} • р-н {obj.district}</p>
-                  <p className="dim-text">{obj.address}</p>
-                  <div className="card-bottom">
-                    <span className="price-tag">{formatPrice(obj.price)} ₽</span>
-                    <span className="agent-tag">{obj.agent}</span>
-                  </div>
+                <div className="registry-card" key={obj.id}>
+                  <h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p>
+                  <p>{obj.district}, {obj.address}</p><strong>€ {obj.price}</strong><span>{obj.agent}</span>
                 </div>
               ))}
               {registryTab === 'clients' && clients.map(cl => (
-                <div className="item-card glass" key={cl.id}>
-                  <h3 className="gold-text">Поиск: {cl.propertyType}</h3>
-                  <p>{cl.roomsFrom}-{cl.roomsTo} комн • {cl.areaFrom}-{cl.areaTo}м²</p>
-                  <p className="dim-text">р-н {cl.district}, {cl.address}</p>
-                  <div className="card-bottom">
-                    <span className="price-tag">{formatPrice(cl.budgetFrom)} - {formatPrice(cl.budgetTo)} ₽</span>
-                  </div>
+                <div className="registry-card" key={cl.id}>
+                  <h3>Поиск: {cl.propertyType}</h3><p>Бюджет: € {cl.budgetFrom} - {cl.budgetTo}</p>
+                  <p>{cl.roomsFrom}-{cl.roomsTo} комн • Этаж {cl.floorFrom}-{cl.floorTo}</p>
+                  <p>{cl.district}, {cl.address}</p><span>{cl.agent}</span>
                 </div>
               ))}
               {registryTab === 'agents' && (
-                <div className="item-card glass">
-                  <h3 className="gold-text">Александр</h3>
-                  <p>Объекты: 14 • Клиенты: 22</p>
-                  <p className="gold-text">+7 (999) 000-00-00</p>
-                </div>
+                <div className="registry-card"><h3>Alexander</h3><p>Объекты: 8 • Клиенты: 12</p><span>+49 111 111</span></div>
               )}
             </div>
-          </div>
+          </>
         )}
       </section>
 
-      <nav className="bottom-nav glass">
-        <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}><Home size={20} /><span>Главная</span></button>
-        <button className={activeTab === 'objects' ? 'active' : ''} onClick={() => setActiveTab('objects')}><Building2 size={20} /><span>Объект</span></button>
-        <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}><Users size={20} /><span>Клиент</span></button>
-        <button className={activeTab === 'registry' ? 'active' : ''} onClick={() => setActiveTab('registry')}><ClipboardList size={20} /><span>Реестр</span></button>
+      <nav className="bottom-nav">
+        <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}><Home size={22} /><span>Главная</span></button>
+        <button className={activeTab === 'objects' ? 'active' : ''} onClick={() => setActiveTab('objects')}><Building2 size={22} /><span>Объект</span></button>
+        <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}><Users size={22} /><span>Клиент</span></button>
+        <button className={activeTab === 'registry' ? 'active' : ''} onClick={() => setActiveTab('registry')}><ClipboardList size={22} /><span>Реестр</span></button>
       </nav>
 
       <style jsx>{`
-        :global(body) { background: #0a0a0a; color: #fff; margin: 0; font-family: 'Inter', sans-serif; }
-        .crm-container { max-width: 480px; margin: 0 auto; min-height: 100vh; padding-bottom: 90px; }
+        .group-label { fontSize: 12px; fontWeight: bold; color: #666; marginBottom: 8px; text-transform: uppercase; }
+        .stats-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .stat-box-simple { border: 1px solid #eee; padding: 10px; border-radius: 12px; text-align: center; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .stat-box-simple h3 { margin: 0; font-size: 18px; }
+        .stat-box-simple span { font-size: 10px; color: #888; text-transform: uppercase; }
         
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; }
-        .gold-text { color: #d4af37; font-weight: bold; }
-        .dim-text { color: rgba(255, 255, 255, 0.5); font-size: 13px; }
+        .agent-rank-card { display: flex; align-items: center; background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #eee; }
         
-        .topbar { padding: 25px; text-align: center; }
-        .topbar h1 { margin: 0; font-size: 22px; letter-spacing: 2px; }
-
-        .section-label { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 800; letter-spacing: 1px; margin-bottom: 12px; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .stat-card { padding: 15px; text-align: center; }
-        .stat-card h3 { margin: 0; font-size: 22px; color: #d4af37; }
-        .stat-card span { font-size: 10px; opacity: 0.6; text-transform: uppercase; }
-
-        .rating-section { padding: 20px; }
-        .rank-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .rank-num { width: 30px; font-weight: 900; color: #d4af37; }
-        .rank-info { flex: 1; font-size: 15px; }
-
-        .form-container { padding: 25px; margin: 0 15px; }
-        .form-stack { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .form-container { background: #fff; padding: 20px; border-radius: 15px; border: 1px solid #eee; }
+        .form-stack { display: flex; flex-direction: column; gap: 10px; }
+        .form-input { padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; width: 100%; outline: none; background: #f9f9f9; }
+        .dual-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; border: none; width: 100%; }
         
-        .gold-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 12px; padding: 14px; color: #fff; outline: none; font-size: 15px; }
-        .gold-input:focus { border-color: #d4af37; box-shadow: 0 0 10px rgba(212, 175, 55, 0.1); }
-        .dual-input { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .registry-nav { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .reg-btn { padding: 12px; border: 1px solid #000; border-radius: 8px; background: transparent; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .reg-btn.active { background: #000; color: #fff; }
         
-        .gold-btn { background: #d4af37; color: #000; font-weight: 900; padding: 16px; border-radius: 12px; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-        .gold-btn:active { transform: scale(0.98); }
+        .registry-filter-container { margin-bottom: 15px; }
+        .filter-toggle-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; cursor: pointer; }
+        .expanded-filter-panel { background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 0 0 12px 12px; border-top: none; }
+        .filter-fields { display: flex; flex-direction: column; gap: 10px; }
 
-        .registry-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; margin: 0 15px 15px; padding: 5px; }
-        .reg-nav-btn { padding: 12px; background: none; border: none; color: #888; font-weight: 600; cursor: pointer; border-radius: 15px; }
-        .reg-nav-btn.active { background: rgba(212, 175, 55, 0.15); color: #d4af37; }
+        .registry-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; position: relative; }
+        .registry-card h3 { margin: 0 0 5px; font-size: 16px; }
+        .registry-card p { margin: 0; font-size: 13px; color: #666; }
+        .registry-card strong { display: block; margin-top: 5px; color: #000; }
+        .registry-card span { position: absolute; right: 15px; top: 15px; font-size: 11px; color: #aaa; }
 
-        .filter-dropdown { margin: 0 15px 20px; }
-        .filter-trigger { width: 100%; padding: 15px; display: flex; justify-content: space-between; align-items: center; color: #fff; font-weight: bold; }
-        .filter-panel { padding: 20px; border-top: none; border-radius: 0 0 20px 20px; }
-
-        .item-card { padding: 20px; margin: 0 15px 12px; }
-        .card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
-        .price-tag { font-size: 18px; font-weight: 800; color: #d4af37; }
-        .agent-tag { font-size: 12px; opacity: 0.5; }
-
-        .bottom-nav { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 440px; height: 70px; display: flex; justify-content: space-around; align-items: center; z-index: 100; border: 1px solid rgba(255,255,255,0.15); }
-        .bottom-nav button { background: none; border: none; color: rgba(255,255,255,0.3); display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
-        .bottom-nav button.active { color: #d4af37; }
+        .crm-container { max-width: 500px; margin: 0 auto; background: #fcfcfc; min-height: 100vh; font-family: sans-serif; }
+        .topbar { padding: 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .topbar h1 { margin: 0; font-size: 20px; }
+        .profile-btn { background: none; border: none; cursor: pointer; }
+        .content { padding: 20px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; height: 70px; background: #fff; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; }
+        .bottom-nav button { background: none; border: none; color: #ccc; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .bottom-nav button.active { color: #000; }
         .bottom-nav span { font-size: 10px; font-weight: bold; }
-
-        .login-page { height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .login-card { width: 100%; max-width: 350px; padding: 40px 30px; text-align: center; }
-        .animate-slide { animation: slideDown 0.3s ease-out; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; padding: 20px; }
+        .login-card { background: #fff; padding: 40px 20px; border-radius: 20px; width: 100%; text-align: center; }
+        .login-card h1 { margin-bottom: 30px; }
+        .login-card input { padding: 15px; width: 100%; border-radius: 10px; border: 1px solid #eee; margin-bottom: 15px; outline: none; background: #f9f9f9; }
+        .login-card button { width: 100%; padding: 16px; background: #000; color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
       `}</style>
     </main>
   )
               }
-                    

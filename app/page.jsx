@@ -193,6 +193,10 @@ export default function HomePage() {
                         <input className="form-input" placeholder="Цена от" />
                         <input className="form-input" placeholder="Цена до" />
                       </div>
+                      <div className="dual-input">
+                        <input className="form-input" placeholder="Кв² от" />
+                        <input className="form-input" placeholder="Кв² до" />
+                      </div>
                       <div className="dual-input"><input className="form-input" placeholder="Комнаты от" /><input className="form-input" placeholder="Комнаты до" /></div>
                       <div className="dual-input"><input className="form-input" placeholder="Этаж от" /><input className="form-input" placeholder="Этаж до" /></div>
                       <select className="form-input">
@@ -285,5 +289,5 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-                                                                                         }
-                    
+                }
+                

@@ -21,65 +21,31 @@ export default function HomePage() {
   const [agentName, setAgentName] = useState('')
   const [agentPhone, setAgentPhone] = useState('')
 
+  // Данные
   const [objects, setObjects] = useState([
-    {
-      id: 1,
-      type: 'Квартира',
-      price: '450000',
-      rooms: '3',
-      area: '85',
-      floor: '4',
-      district: 'Frankfurt Center',
-      address: 'Main Street 21',
-      agent: 'Alexander',
-      phone: '+49 111 111'
-    }
+    { id: 1, type: 'Квартира', price: '450000', rooms: '3', area: '85', floor: '4', district: 'Frankfurt Center', address: 'Main Street 21', agent: 'Alexander' }
   ])
 
   const [clients, setClients] = useState([
-    {
-      id: 1,
-      clientType: 'Покупатель',
-      propertyType: 'Квартира',
-      budgetFrom: '300000',
-      budgetTo: '500000',
-      roomsFrom: '2',
-      roomsTo: '4',
-      floorFrom: '1',
-      floorTo: '6',
-      areaFrom: '60',
-      areaTo: '120',
-      district: 'Frankfurt Center',
-      address: 'Center',
-      agent: 'Alexander',
-      phone: '+49 111 111'
-    }
+    { id: 1, propertyType: 'Квартира', budgetFrom: '300000', budgetTo: '500000', roomsFrom: '2', roomsTo: '4', floorFrom: '1', floorTo: '6', areaFrom: '60', areaTo: '120', district: 'Frankfurt Center', agent: 'Alexander' }
   ])
 
-  const [newObject, setNewObject] = useState({
-    type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: '', address: ''
-  })
-
-  const [newClient, setNewClient] = useState({
-    clientType: 'Покупатель', propertyType: 'Квартира', budgetFrom: '', budgetTo: '',
-    roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '',
-    district: '', address: ''
-  })
+  // Состояния форм
+  const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: '', address: '' })
+  const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: '', address: '' })
 
   const addObject = () => {
     if(!newObject.price) return alert("Введите цену");
-    setObjects([...objects, { id: Date.now(), ...newObject, agent: agentName, phone: agentPhone }]);
+    setObjects([...objects, { id: Date.now(), ...newObject, agent: agentName }]);
     setNewObject({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: '', address: '' });
-    alert("Объект добавлен в реестр");
+    alert("Объект добавлен");
   }
 
   const addClient = () => {
-    setClients([...clients, { id: Date.now(), ...newClient, agent: agentName, phone: agentPhone }]);
-    alert("Клиент добавлен в реестр");
+    setClients([...clients, { id: Date.now(), ...newClient, agent: agentName }]);
+    setNewClient({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: '', address: '' });
+    alert("Заявка клиента добавлена");
   }
-
-  const sellers = clients.filter(c => c.clientType === 'Продавец')
-  const buyers = clients.filter(c => c.clientType === 'Покупатель')
 
   if (!loggedIn) {
     return (
@@ -105,7 +71,7 @@ export default function HomePage() {
         <button className="profile-btn"><User size={20} /></button>
       </header>
 
-      <section className="content" style={{ paddingBottom: '80px' }}>
+      <section className="content" style={{ paddingBottom: '100px' }}>
         
         {activeTab === 'home' && (
           <>
@@ -113,17 +79,16 @@ export default function HomePage() {
               <div>
                 <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#666', marginBottom: '8px' }}>МОИ ПОКАЗАТЕЛИ</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                  <div className="stat-box-simple"><h3>{buyers.length}</h3><span>Покупатели</span></div>
-                  <div className="stat-box-simple"><h3>{sellers.length}</h3><span>Продавцы</span></div>
+                  <div className="stat-box-simple"><h3>{clients.length}</h3><span>Клиенты</span></div>
+                  <div className="stat-box-simple"><h3>{objects.length}</h3><span>Объекты</span></div>
                   <div className="stat-box-simple"><h3>0</h3><span>Матчи</span></div>
                 </div>
               </div>
-
               <div>
                 <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#666', marginBottom: '8px' }}>КОМПАНИЯ</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                  <div className="stat-box-simple"><h3>124</h3><span>Покупатели</span></div>
-                  <div className="stat-box-simple"><h3>86</h3><span>Продавцы</span></div>
+                  <div className="stat-box-simple"><h3>124</h3><span>Клиенты</span></div>
+                  <div className="stat-box-simple"><h3>86</h3><span>Объекты</span></div>
                   <div className="stat-box-simple"><h3>12</h3><span>Агенты</span></div>
                 </div>
               </div>
@@ -136,11 +101,11 @@ export default function HomePage() {
                 { name: 'Emma', b: 9, s: 7, color: '#C0C0C0' },
                 { name: 'Daniel', b: 8, s: 6, color: '#CD7F32' }
               ].map((agent, index) => (
-                <div key={agent.name} style={{ display: 'flex', alignItems: 'center', background: '#fff', padding: '12px', borderRadius: '12px', marginBottom: '10px', border: '1px solid #eee' }}>
+                <div key={agent.name} className="agent-rank-card">
                   <div style={{ width: '30px', fontWeight: 'bold', color: agent.color }}>{index + 1}</div>
                   <div style={{ flex: 1 }}>
                     <h3 style={{ margin: 0, fontSize: '16px' }}>{agent.name}</h3>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>{agent.b} покупателей • {agent.s} продавцов</p>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>{agent.b} клиентов • {agent.s} объектов</p>
                   </div>
                   <Medal size={20} color={agent.color} />
                 </div>
@@ -150,83 +115,80 @@ export default function HomePage() {
         )}
 
         {activeTab === 'objects' && (
-          <div style={{ background: '#fff', padding: '20px', borderRadius: '15px', border: '1px solid #eee' }}>
-            <h2 style={{ marginBottom: '15px' }}>Добавить объект</h2>
+          <div className="form-container">
+            <h2 style={{ marginBottom: '15px' }}>Выставить объект</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <select className="form-input" onChange={e => setNewObject({...newObject, type: e.target.value})}>
+              <select className="form-input" value={newObject.type} onChange={e => setNewObject({...newObject, type: e.target.value})}>
                 <option>Квартира</option><option>Дом</option>
               </select>
-              <input className="form-input" placeholder="Цена" onChange={e => setNewObject({...newObject, price: e.target.value})} />
-              <input className="form-input" placeholder="Кв²" onChange={e => setNewObject({...newObject, area: e.target.value})} />
-              <input className="form-input" placeholder="Комнаты" onChange={e => setNewObject({...newObject, rooms: e.target.value})} />
-              <input className="form-input" placeholder="Этаж" onChange={e => setNewObject({...newObject, floor: e.target.value})} />
-              <input className="form-input" placeholder="Район" onChange={e => setNewObject({...newObject, district: e.target.value})} />
-              <input className="form-input" placeholder="Адрес" onChange={e => setNewObject({...newObject, address: e.target.value})} />
-              <button className="save-btn" onClick={addObject}>СОХРАНИТЬ ОБЪЕКТ</button>
+              <input className="form-input" placeholder="Цена" value={newObject.price} onChange={e => setNewObject({...newObject, price: e.target.value})} />
+              <input className="form-input" placeholder="Кв²" value={newObject.area} onChange={e => setNewObject({...newObject, area: e.target.value})} />
+              <input className="form-input" placeholder="Комнаты" value={newObject.rooms} onChange={e => setNewObject({...newObject, rooms: e.target.value})} />
+              <input className="form-input" placeholder="Этаж" value={newObject.floor} onChange={e => setNewObject({...newObject, floor: e.target.value})} />
+              <input className="form-input" placeholder="Район" value={newObject.district} onChange={e => setNewObject({...newObject, district: e.target.value})} />
+              <input className="form-input" placeholder="Адрес" value={newObject.address} onChange={e => setNewObject({...newObject, address: e.target.value})} />
+              <button className="save-btn" onClick={addObject}>ОПУБЛИКОВАТЬ</button>
             </div>
           </div>
         )}
 
         {activeTab === 'clients' && (
-          <div style={{ background: '#fff', padding: '20px', borderRadius: '15px', border: '1px solid #eee' }}>
-            <h2 style={{ marginBottom: '15px' }}>Добавить клиента</h2>
+          <div className="form-container">
+            <h2 style={{ marginBottom: '15px' }}>Заявка покупателя</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <select className="form-input" onChange={e => setNewClient({...newClient, clientType: e.target.value})}><option>Покупатель</option><option>Продавец</option></select>
-                <select className="form-input" onChange={e => setNewClient({...newClient, propertyType: e.target.value})}><option>Квартира</option><option>Дом</option></select>
-              </div>
-              
-              <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#666' }}>Цена (от / до)</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <input className="form-input" placeholder="От" onChange={e => setNewClient({...newClient, budgetFrom: e.target.value})} />
-                <input className="form-input" placeholder="До" onChange={e => setNewClient({...newClient, budgetTo: e.target.value})} />
-              </div>
-
-              <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#666' }}>Кв² (от / до)</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <input className="form-input" placeholder="От" onChange={e => setNewClient({...newClient, areaFrom: e.target.value})} />
-                <input className="form-input" placeholder="До" onChange={e => setNewClient({...newClient, areaTo: e.target.value})} />
-              </div>
-
-              <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#666' }}>Комнаты (от / до)</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <input className="form-input" placeholder="От" onChange={e => setNewClient({...newClient, roomsFrom: e.target.value})} />
-                <input className="form-input" placeholder="До" onChange={e => setNewClient({...newClient, roomsTo: e.target.value})} />
-              </div>
-
-              <p style={{ margin: '5px 0 0', fontSize: '12px', color: '#666' }}>Этаж (от / до)</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <input className="form-input" placeholder="От" onChange={e => setNewClient({...newClient, floorFrom: e.target.value})} />
-                <input className="form-input" placeholder="До" onChange={e => setNewClient({...newClient, floorTo: e.target.value})} />
-              </div>
-
+              <select className="form-input" value={newClient.propertyType} onChange={e => setNewClient({...newClient, propertyType: e.target.value})}><option>Квартира</option><option>Дом</option></select>
+              <div className="dual-input"><input className="form-input" placeholder="Цена от" onChange={e => setNewClient({...newClient, budgetFrom: e.target.value})} /><input className="form-input" placeholder="Цена до" onChange={e => setNewClient({...newClient, budgetTo: e.target.value})} /></div>
+              <div className="dual-input"><input className="form-input" placeholder="Кв² от" onChange={e => setNewClient({...newClient, areaFrom: e.target.value})} /><input className="form-input" placeholder="Кв² до" onChange={e => setNewClient({...newClient, areaTo: e.target.value})} /></div>
+              <div className="dual-input"><input className="form-input" placeholder="Комнат от" onChange={e => setNewClient({...newClient, roomsFrom: e.target.value})} /><input className="form-input" placeholder="Комнат до" onChange={e => setNewClient({...newClient, roomsTo: e.target.value})} /></div>
+              <div className="dual-input"><input className="form-input" placeholder="Этаж от" onChange={e => setNewClient({...newClient, floorFrom: e.target.value})} /><input className="form-input" placeholder="Этаж до" onChange={e => setNewClient({...newClient, floorTo: e.target.value})} /></div>
               <input className="form-input" placeholder="Район" onChange={e => setNewClient({...newClient, district: e.target.value})} />
-              <input className="form-input" placeholder="Адрес" onChange={e => setNewClient({...newClient, address: e.target.value})} />
-              <button className="save-btn" onClick={addClient}>СОХРАНИТЬ КЛИЕНТА</button>
+              <button className="save-btn" onClick={addClient}>СОХРАНИТЬ ЗАЯВКУ</button>
             </div>
           </div>
         )}
 
         {activeTab === 'registry' && (
           <>
-            <div className="registry-tabs">
-              <button className={registryTab === 'objects' ? 'active' : ''} onClick={() => setRegistryTab('objects')}>Объекты</button>
-              <button className={registryTab === 'clients' ? 'active' : ''} onClick={() => setRegistryTab('clients')}>Клиенты</button>
-              <button className={registryTab === 'agents' ? 'active' : ''} onClick={() => setRegistryTab('agents')}>Агенты</button>
+            <div className="registry-nav">
+              <button className={registryTab === 'objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('objects')}>Объекты</button>
+              <button className={registryTab === 'clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('clients')}>Клиенты</button>
+              <button className={registryTab === 'agents' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('agents')}>Агенты</button>
             </div>
-            <div className="search-box"><Search size={18} /><input placeholder="Поиск..." /></div>
-            {registryTab === 'objects' && objects.map(obj => (
-              <div className="registry-card" key={obj.id}>
-                <h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p>
-                <p>{obj.district}, {obj.address}</p><strong>€ {obj.price}</strong><span>{obj.agent}</span>
-              </div>
-            ))}
-            {registryTab === 'clients' && clients.map(cl => (
-              <div className="registry-card" key={cl.id}>
-                <h3>{cl.clientType}</h3><p>{cl.propertyType} • {cl.roomsFrom}-{cl.roomsTo} комн</p>
-                <p>Бюджет: € {cl.budgetFrom} - {cl.budgetTo}</p><span>{cl.agent}</span>
-              </div>
-            ))}
+
+            {/* Панель фильтров в реестре */}
+            <div className="registry-filters">
+              {registryTab === 'objects' && (
+                <div className="filter-panel">
+                  <select className="form-input"><option>Все типы</option><option>Квартира</option><option>Дом</option></select>
+                  <input className="form-input" placeholder="Цена" />
+                  <div className="dual-input"><input className="form-input" placeholder="Комнаты" /><input className="form-input" placeholder="Район" /></div>
+                </div>
+              )}
+              {registryTab === 'clients' && (
+                <div className="filter-panel">
+                  <div className="dual-input"><input className="form-input" placeholder="Цена от" /><input className="form-input" placeholder="Цена до" /></div>
+                  <div className="dual-input"><input className="form-input" placeholder="Комнаты" /><input className="form-input" placeholder="Район" /></div>
+                </div>
+              )}
+            </div>
+
+            <div className="list-section">
+              {registryTab === 'objects' && objects.map(obj => (
+                <div className="registry-card" key={obj.id}>
+                  <h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • {obj.district}</p>
+                  <strong>€ {obj.price}</strong><span>{obj.agent}</span>
+                </div>
+              ))}
+              {registryTab === 'clients' && clients.map(cl => (
+                <div className="registry-card" key={cl.id}>
+                  <h3>Запрос: {cl.propertyType}</h3><p>Бюджет: € {cl.budgetFrom} - {cl.budgetTo}</p>
+                  <p>{cl.roomsFrom}-{cl.roomsTo} комн • {cl.district}</p><span>{cl.agent}</span>
+                </div>
+              ))}
+              {registryTab === 'agents' && (
+                <div className="registry-card"><h3>Alexander</h3><p>Объекты: 8 • Клиенты: 12</p><span>+49 111 111</span></div>
+              )}
+            </div>
           </>
         )}
       </section>
@@ -239,13 +201,31 @@ export default function HomePage() {
       </nav>
 
       <style jsx>{`
-        .stat-box-simple { border: 1px solid #eee; padding: 10px; borderRadius: 12px; textAlign: center; background: #fff; }
+        .stat-box-simple { border: 1px solid #eee; padding: 10px; border-radius: 12px; text-align: center; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .stat-box-simple h3 { margin: 0; font-size: 18px; }
         .stat-box-simple span { font-size: 10px; color: #888; text-transform: uppercase; }
-        .form-input { padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; width: 100%; outline: none; }
-        .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; border: none; }
+        
+        .agent-rank-card { display: flex; align-items: center; background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #eee; }
+        
+        .form-container { background: #fff; padding: 20px; border-radius: 15px; border: 1px solid #eee; }
+        .form-input { padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; width: 100%; outline: none; background: #f9f9f9; }
+        .dual-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; border: none; width: 100%; }
+        
+        .registry-nav { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .reg-btn { padding: 10px; border: 1px solid #000; border-radius: 8px; background: transparent; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .reg-btn.active { background: #000; color: #fff; }
+        
+        .registry-filters { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 15px; }
+        .filter-panel { display: flex; flexDirection: column; gap: 10px; }
+        
+        .registry-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; position: relative; }
+        .registry-card h3 { margin: 0 0 5px; font-size: 16px; }
+        .registry-card p { margin: 0; font-size: 13px; color: #666; }
+        .registry-card strong { display: block; margin-top: 5px; color: #000; }
+        .registry-card span { position: absolute; right: 15px; top: 15px; font-size: 11px; color: #aaa; }
       `}</style>
     </main>
   )
               }
-                                                                                            
+                                  

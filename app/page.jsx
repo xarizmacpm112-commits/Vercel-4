@@ -42,28 +42,21 @@ export default function HomePage() {
     return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7, 9)} ${phoneNumber.slice(9, 11)}`;
   };
 
-  // Состояния для фильтров реестра
-  const [filterPriceFrom, setFilterPriceFrom] = useState('')
-  const [filterPriceTo, setFilterPriceTo] = useState('')
-
   // ПУСТАЯ БАЗА ДАННЫХ ПРИ СТАРТЕ
   const [objects, setObjects] = useState([])
   const [clients, setClients] = useState([])
 
-  // Динамический расчет ТОП-3 агентов на основе реальных данных
+  // Динамический расчет ТОП-3 агентов
   const topAgents = useMemo(() => {
     const stats = {};
-
     objects.forEach(obj => {
       if (!stats[obj.agent]) stats[obj.agent] = { name: obj.agent, b: 0, s: 0 };
       stats[obj.agent].s += 1;
     });
-
     clients.forEach(cl => {
       if (!stats[cl.agent]) stats[cl.agent] = { name: cl.agent, b: 0, s: 0 };
       stats[cl.agent].b += 1;
     });
-
     const sorted = Object.values(stats).sort((a, b) => (b.b + b.s) - (a.b + a.s));
     return [sorted[0] || null, sorted[1] || null, sorted[2] || null];
   }, [objects, clients]);
@@ -210,8 +203,27 @@ export default function HomePage() {
                   <div className="expanded-filter-panel">
                     <div className="filter-fields">
                       <select className="form-input"><option>Все типы</option><option>Квартира</option><option>Дом</option></select>
-                      <input className="form-input" placeholder="Цена от" value={formatNumber(filterPriceFrom)} onChange={e => setFilterPriceFrom(e.target.value.replace(/\s/g, ''))} />
-                      <input className="form-input" placeholder="Цена до" value={formatNumber(filterPriceTo)} onChange={e => setFilterPriceTo(e.target.value.replace(/\s/g, ''))} />
+                      
+                      <div className="dual-input">
+                        <input className="form-input" placeholder="Цена от (₽)" onChange={e => e.target.value = formatNumber(e.target.value.replace(/\s/g, ''))} />
+                        <input className="form-input" placeholder="Цена до (₽)" onChange={e => e.target.value = formatNumber(e.target.value.replace(/\s/g, ''))} />
+                      </div>
+
+                      <div className="dual-input">
+                        <input className="form-input" placeholder="Кв² от" />
+                        <input className="form-input" placeholder="Кв² до" />
+                      </div>
+
+                      <div className="dual-input">
+                        <input className="form-input" placeholder="Комнат от" />
+                        <input className="form-input" placeholder="Комнат до" />
+                      </div>
+
+                      <div className="dual-input">
+                        <input className="form-input" placeholder="Этаж от" />
+                        <input className="form-input" placeholder="Этаж до" />
+                      </div>
+
                       <select className="form-input"><option>Все районы</option><option>Ленинский</option><option>Кировский</option><option>Московский</option></select>
                       <button className="save-btn" onClick={() => setShowFilters(false)}>НАЙТИ</button>
                     </div>
@@ -289,9 +301,4 @@ export default function HomePage() {
         .login-card { background: #fff; padding: 40px 20px; border-radius: 20px; width: 100%; text-align: center; }
         .login-card h1 { margin-bottom: 30px; }
         .login-card input { padding: 15px; width: 100%; border-radius: 10px; border: 1px solid #eee; margin-bottom: 15px; outline: none; background: #f9f9f9; }
-        .login-card button { width: 100%; padding: 16px; background: #000; color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-      `}</style>
-    </main>
-  )
-            }
-            
+        .login-card button { width: 100%; padding: 16px; background: #000; color: #fff; border: none

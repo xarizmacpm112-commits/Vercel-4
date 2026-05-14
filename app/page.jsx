@@ -30,7 +30,19 @@ export default function HomePage() {
     return number.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
   }
 
-  // Состояния для фильтров реестра (чтобы работал ввод с пробелами)
+  // Функция для форматирования телефона: +7 999 000 00 00
+  const formatPhoneNumber = (value) => {
+    if (!value) return value;
+    const phoneNumber = value.replace(/[^\d]/g, '');
+    const phoneNumberLength = phoneNumber.length;
+    if (phoneNumberLength < 2) return `+${phoneNumber}`;
+    if (phoneNumberLength < 5) return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1)}`;
+    if (phoneNumberLength < 8) return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4)}`;
+    if (phoneNumberLength < 10) return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7)}`;
+    return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7, 9)} ${phoneNumber.slice(9, 11)}`;
+  };
+
+  // Состояния для фильтров реестра
   const [filterPriceFrom, setFilterPriceFrom] = useState('')
   const [filterPriceTo, setFilterPriceTo] = useState('')
 
@@ -66,7 +78,11 @@ export default function HomePage() {
         <div className="login-card">
           <h1>B2B GARANT</h1>
           <input placeholder="Имя агента" value={agentName} onChange={e => setAgentName(e.target.value)} />
-          <input placeholder="+7 (___) ___-__-__" value={agentPhone} onChange={e => setAgentPhone(e.target.value)} />
+          <input 
+            placeholder="+7 999 000 00 00" 
+            value={agentPhone} 
+            onChange={e => setAgentPhone(formatPhoneNumber(e.target.value))} 
+          />
           <button onClick={() => { if (agentName && agentPhone) setLoggedIn(true) }}>ВОЙТИ</button>
         </div>
       </main>
@@ -177,13 +193,14 @@ export default function HomePage() {
 
         {activeTab === 'registry' && (
           <>
-            <div className="registry-nav">
+            <div className="registry-nav-grid">
               <button className={registryTab === 'objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('objects'); setShowFilters(false); }}>Объекты</button>
               <button className={registryTab === 'clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('clients'); setShowFilters(false); }}>Клиенты</button>
               <button className={registryTab === 'agents' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('agents'); setShowFilters(false); }}>Агенты</button>
+              <button className={registryTab === 'matches' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('matches'); setShowFilters(false); }}>Матчи</button>
             </div>
 
-            {registryTab !== 'agents' && (
+            {registryTab !== 'agents' && registryTab !== 'matches' && (
               <div className="registry-filter-container">
                 <button className="filter-toggle-btn" onClick={() => setShowFilters(!showFilters)}>
                    <Search size={16} /> Поиск {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -231,7 +248,10 @@ export default function HomePage() {
                 </div>
               ))}
               {registryTab === 'agents' && (
-                <div className="registry-card"><h3>Alexander</h3><p>Объекты: 8 • Клиенты: 12</p><span>+7 (999) 000-00-00</span></div>
+                <div className="registry-card"><h3>Alexander</h3><p>Объекты: 8 • Клиенты: 12</p><span>+7 999 000 00 00</span></div>
+              )}
+              {registryTab === 'matches' && (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Активных матчей пока нет</div>
               )}
             </div>
           </>
@@ -260,8 +280,9 @@ export default function HomePage() {
         .dual-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; border: none; width: 100%; }
         
-        .registry-nav { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .reg-btn { padding: 12px; border: 1px solid #000; border-radius: 8px; background: transparent; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .registry-nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        @media (min-width: 400px) { .registry-nav-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+        .reg-btn { padding: 12px 5px; border: 1px solid #000; border-radius: 8px; background: transparent; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 12px; }
         .reg-btn.active { background: #000; color: #fff; }
         
         .registry-filter-container { margin-bottom: 15px; }
@@ -280,7 +301,7 @@ export default function HomePage() {
         .topbar h1 { margin: 0; font-size: 20px; }
         .profile-btn { background: none; border: none; cursor: pointer; }
         .content { padding: 20px; }
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; height: 70px; background: #fff; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; }
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; height: 70px; background: #fff; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; z-index: 100; }
         .bottom-nav button { background: none; border: none; color: #ccc; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
         .bottom-nav button.active { color: #000; }
         .bottom-nav span { font-size: 10px; font-weight: bold; }
@@ -293,5 +314,5 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-                }
-      
+                    }
+                  

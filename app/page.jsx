@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   Home,
   Building2,
@@ -55,17 +55,39 @@ export default function HomePage() {
     { id: 1, propertyType: 'Квартира', budgetFrom: '5000000', budgetTo: '9500000', roomsFrom: '2', roomsTo: '4', floorFrom: '1', floorTo: '6', areaFrom: '60', areaTo: '120', district: 'Кировский', address: 'Центр 1', agent: 'Alexander' }
   ])
 
+  // Динамический расчет ТОП-3 агентов на основе реальных данных
+  const topAgents = useMemo(() => {
+    const stats = {};
+
+    // Собираем статистику по объектам
+    objects.forEach(obj => {
+      if (!stats[obj.agent]) stats[obj.agent] = { name: obj.agent, b: 0, s: 0 };
+      stats[obj.agent].s += 1;
+    });
+
+    // Собираем статистику по клиентам
+    clients.forEach(cl => {
+      if (!stats[cl.agent]) stats[cl.agent] = { name: cl.agent, b: 0, s: 0 };
+      stats[cl.agent].b += 1;
+    });
+
+    // Превращаем в массив и сортируем по суммарной активности
+    const sorted = Object.values(stats).sort((a, b) => (b.b + b.s) - (a.b + a.s));
+    
+    // Возвращаем ТОП-3 (если меньше 3-х, останутся null)
+    return [sorted[0] || null, sorted[1] || null, sorted[2] || null];
+  }, [objects, clients]);
+
+  // Цвета для медалей
+  const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
+
   // Формы добавления
   const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
   const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
 
   const addObject = () => {
     if(!newObject.price) return alert("Введите цену");
-    const objectToAdd = { 
-      ...newObject, 
-      id: Date.now(), 
-      agent: agentName 
-    };
+    const objectToAdd = { ...newObject, id: Date.now(), agent: agentName };
     setObjects(prev => [objectToAdd, ...prev]);
     setNewObject({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' });
     setActiveTab('registry');
@@ -74,11 +96,7 @@ export default function HomePage() {
   }
 
   const addClient = () => {
-    const clientToAdd = { 
-      ...newClient, 
-      id: Date.now(), 
-      agent: agentName 
-    };
+    const clientToAdd = { ...newClient, id: Date.now(), agent: agentName };
     setClients(prev => [clientToAdd, ...prev]);
     setNewClient({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' });
     setActiveTab('registry');
@@ -128,27 +146,25 @@ export default function HomePage() {
               <div>
                 <p className="group-label">КОМПАНИЯ</p>
                 <div className="stats-grid-3">
-                  <div className="stat-box-simple"><h3>124</h3><span>Клиенты</span></div>
-                  <div className="stat-box-simple"><h3>86</h3><span>Объекты</span></div>
-                  <div className="stat-box-simple"><h3>12</h3><span>Агенты</span></div>
+                  <div className="stat-box-simple"><h3>{clients.length}</h3><span>Клиенты</span></div>
+                  <div className="stat-box-simple"><h3>{objects.length}</h3><span>Объекты</span></div>
+                  <div className="stat-box-simple"><h3>0</h3><span>Матчи</span></div>
                 </div>
               </div>
             </div>
 
             <div className="agents-section">
               <div className="section-title"><Trophy size={18} /> Лучшие агенты</div>
-              {[ 
-                { name: 'Alexander', b: 12, s: 8, color: '#FFD700' },
-                { name: 'Emma', b: 9, s: 7, color: '#C0C0C0' },
-                { name: 'Daniel', b: 8, s: 6, color: '#CD7F32' }
-              ].map((agent, index) => (
-                <div key={agent.name} className="agent-rank-card">
-                  <div style={{ width: '30px', fontWeight: 'bold', color: agent.color }}>{index + 1}</div>
+              {topAgents.map((agent, index) => (
+                <div key={index} className="agent-rank-card" style={{ opacity: agent ? 1 : 0.4 }}>
+                  <div style={{ width: '30px', fontWeight: 'bold', color: rankColors[index] }}>{index + 1}</div>
                   <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: 0, fontSize: '16px' }}>{agent.name}</h3>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>{agent.b} клиентов • {agent.s} объектов</p>
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>{agent ? agent.name : '—'}</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
+                      {agent ? `${agent.b} клиентов • ${agent.s} объектов` : 'Место вакантно'}
+                    </p>
                   </div>
-                  <Medal size={20} color={agent.color} />
+                  <Medal size={20} color={agent ? rankColors[index] : '#eee'} />
                 </div>
               ))}
             </div>
@@ -258,7 +274,7 @@ export default function HomePage() {
                 </div>
               ))}
               {registryTab === 'agents' && (
-                <div className="registry-card"><h3>Alexander</h3><p>Объекты: 8 • Клиенты: 12</p><span>+7 999 000 00 00</span></div>
+                <div className="registry-card"><h3>{agentName}</h3><p>Объекты: {objects.filter(o => o.agent === agentName).length} • Клиенты: {clients.filter(c => c.agent === agentName).length}</p><span>{agentPhone}</span></div>
               )}
               {registryTab === 'matches' && (
                 <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Активных матчей пока нет</div>
@@ -282,7 +298,7 @@ export default function HomePage() {
         .stat-box-simple h3 { margin: 0; font-size: 18px; }
         .stat-box-simple span { font-size: 10px; color: #888; text-transform: uppercase; }
         
-        .agent-rank-card { display: flex; align-items: center; background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #eee; }
+        .agent-rank-card { display: flex; align-items: center; background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #eee; transition: 0.3s; }
         
         .form-container { background: #fff; padding: 20px; border-radius: 15px; border: 1px solid #eee; }
         .form-stack { display: flex; flex-direction: column; gap: 10px; }
@@ -313,16 +329,4 @@ export default function HomePage() {
         .content { padding: 20px; }
         .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; height: 70px; background: #fff; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; z-index: 100; }
         .bottom-nav button { background: none; border: none; color: #ccc; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
-        .bottom-nav button.active { color: #000; }
-        .bottom-nav span { font-size: 10px; font-weight: bold; }
-        
-        .login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; padding: 20px; }
-        .login-card { background: #fff; padding: 40px 20px; border-radius: 20px; width: 100%; text-align: center; }
-        .login-card h1 { margin-bottom: 30px; }
-        .login-card input { padding: 15px; width: 100%; border-radius: 10px; border: 1px solid #eee; margin-bottom: 15px; outline: none; background: #f9f9f9; }
-        .login-card button { width: 100%; padding: 16px; background: #000; color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-      `}</style>
-    </main>
-  )
-                }
-                
+  

@@ -57,11 +57,14 @@ export default function HomePage() {
     }
   }, [loggedIn, fetchData])
 
-  const sortedAgents = [...agentsList].map(agent => {
+  // Расширенная статистика для списка агентов
+  const agentsWithStats = [...agentsList].map(agent => {
     const agentObjects = objects.filter(o => o.agent === agent.name).length
     const agentClients = clients.filter(c => c.agent === agent.name).length
     return { ...agent, agentObjects, agentClients }
   }).sort((a, b) => b.agentObjects - a.agentObjects)
+
+  const topThreeAgents = agentsWithStats.slice(0, 3)
 
   const formatNumber = (val) => {
     if (!val) return ''
@@ -114,8 +117,7 @@ export default function HomePage() {
       setNewClient({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
       alert("Заявка клиента сохранена")
     } else {
-      console.error(error)
-      alert("Ошибка сохранения")
+      alert("Ошибка при сохранении клиента")
     }
   }
 
@@ -159,15 +161,15 @@ export default function HomePage() {
               </div>
             </div>
             <div className="agents-section">
-              <div className="section-title"><Trophy size={18} /> Рейтинг по объектам</div>
-              {sortedAgents.slice(0, 10).map((agent, i) => (
+              <div className="section-title"><Trophy size={18} /> Топ-3 агента</div>
+              {topThreeAgents.map((agent, i) => (
                 <div key={agent.id} className="agent-rank-card">
                   <div style={{ width: '30px', fontWeight: 'bold' }}>{i + 1}</div>
                   <div style={{ flex: 1 }}>
                     <h3 style={{ margin: 0, fontSize: '15px' }}>{agent.name}</h3>
                     <p style={{ margin: 0, fontSize: '11px', color: '#888' }}>Объектов: {agent.agentObjects} | Клиентов: {agent.agentClients}</p>
                   </div>
-                  <Medal size={20} color={i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : '#eee'} />
+                  <Medal size={20} color={i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : '#CD7F32'} />
                 </div>
               ))}
             </div>
@@ -212,7 +214,7 @@ export default function HomePage() {
                 <input className="form-input" placeholder="Этаж до" value={newClient.floorTo} onChange={e => setNewClient({...newClient, floorTo: e.target.value})} />
               </div>
               <select className="form-input" value={newClient.district} onChange={e => setNewClient({...newClient, district: e.target.value})}><option>Ленинский</option><option>Кировский</option><option>Московский</option></select>
-              <input className="form-input" placeholder="Адрес / Комментарий" value={newClient.address} onChange={e => setNewClient({...newClient, address: e.target.value})} />
+              <input className="form-input" placeholder="Комментарий / Адрес" value={newClient.address} onChange={e => setNewClient({...newClient, address: e.target.value})} />
               <button className="save-btn" onClick={addClient}>СОХРАНИТЬ ЗАЯВКУ</button>
             </div>
           </div>
@@ -226,26 +228,6 @@ export default function HomePage() {
               <button className={registryTab === 'agents' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('agents'); setShowFilters(false); }}>Агенты</button>
               <button className={registryTab === 'matches' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('matches'); setShowFilters(false); }}>Матчи</button>
             </div>
-            {registryTab !== 'agents' && registryTab !== 'matches' && (
-              <div className="registry-filter-container">
-                <button className="filter-toggle-btn" onClick={() => setShowFilters(!showFilters)}>
-                  <Search size={16} /> Поиск {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                </button>
-                {showFilters && (
-                  <div className="expanded-filter-panel">
-                    <div className="filter-fields">
-                      <select className="form-input"><option>Все типы</option><option>Квартира</option><option>Дом</option></select>
-                      <div className="dual-input">
-                        <input className="form-input" placeholder="Цена от" value={formatNumber(filterPriceFrom)} onChange={e => setFilterPriceFrom(e.target.value.replace(/\s/g, ''))} />
-                        <input className="form-input" placeholder="Цена до" value={formatNumber(filterPriceTo)} onChange={e => setFilterPriceTo(e.target.value.replace(/\s/g, ''))} />
-                      </div>
-                      <select className="form-input"><option>Все районы</option><option>Ленинский</option><option>Кировский</option><option>Московский</option></select>
-                      <button className="save-btn" onClick={() => setShowFilters(false)}>НАЙТИ</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
             <div className="list-section">
               {registryTab === 'objects' && objects.map(o => (
                 <div className="registry-card" key={o.id}>
@@ -259,8 +241,14 @@ export default function HomePage() {
                   <p>{c.roomsFrom}-{c.roomsTo} комн • Район: {c.district}</p><span>{c.agent}</span>
                 </div>
               ))}
-              {registryTab === 'agents' && sortedAgents.map(a => (
-                <div className="registry-card" key={a.id}><h3>{a.name}</h3><p>{a.phone}</p><p style={{fontSize: '11px', marginTop: '4px'}}>Объектов: {a.agentObjects}</p></div>
+              {registryTab === 'agents' && agentsWithStats.map(a => (
+                <div className="registry-card" key={a.id}>
+                  <h3>{a.name}</h3>
+                  <p>{a.phone}</p>
+                  <p style={{fontSize: '11px', marginTop: '6px', color: '#000', fontWeight: 'bold'}}>
+                    Объектов: {a.agentObjects} | Клиентов: {a.agentClients}
+                  </p>
+                </div>
               ))}
               {registryTab === 'matches' && <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Активных матчей нет</div>}
             </div>
@@ -290,9 +278,6 @@ export default function HomePage() {
         .registry-nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 15px; }
         .reg-btn { padding: 10px 2px; border: 1px solid #000; border-radius: 8px; background: transparent; font-weight: bold; cursor: pointer; font-size: 11px; }
         .reg-btn.active { background: #000; color: #fff; }
-        .filter-toggle-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
-        .expanded-filter-panel { background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 0 0 12px 12px; margin-top: -11px; margin-bottom: 15px; }
-        .filter-fields { display: flex; flex-direction: column; gap: 10px; }
         .registry-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; position: relative; }
         .registry-card h3 { margin: 0 0 5px; font-size: 16px; }
         .registry-card p { margin: 0; font-size: 13px; color: #666; }
@@ -314,5 +299,5 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-    }
-                
+              }
+            

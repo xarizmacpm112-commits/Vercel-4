@@ -14,7 +14,7 @@ import {
   ChevronUp
 } from 'lucide-react'
 
-expoооооrt default function HomePage() {
+export default function HomePage() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [activeTab, setActiveTab] = useState('home')
   const [registryTab, setRegistryTab] = useState('objects')

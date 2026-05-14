@@ -6,6 +6,7 @@ import {
   Home, Building2, Users, ClipboardList, User, Trophy, Medal
 } from 'lucide-react'
 
+// Твои ключи Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ptidjrjpuhgfmoshauel.supabase.co'
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0aWRqcmpwdWhnZm1vc2hhdWVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODA4MTAsImV4cCI6MjA5MzY1NjgxMH0.9zUWm7Gv30ORwWXMOpJHsdmoMhHPQVPi-kgyFyt-Vtw'
 const supabase = createClient(supabaseUrl, supabaseKey)
@@ -24,6 +25,7 @@ export default function HomePage() {
   const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
   const [newClient, setNewClient] = useState({ type: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', areaFrom: '', areaTo: '', district: 'Ленинский' })
 
+  // Загрузка данных
   const fetchData = useCallback(async () => {
     const { data: o } = await supabase.from('objects').select('*').order('created_at', { ascending: false })
     const { data: c } = await supabase.from('clients').select('*').order('created_at', { ascending: false })
@@ -41,27 +43,32 @@ export default function HomePage() {
     }
   }, [loggedIn, fetchData])
 
+  // Статистика агентов
   const agentsWithStats = [...agentsList].map(agent => ({
     ...agent,
     agentObjects: objects.filter(o => o.agent_name === agent.name).length,
     agentClients: clients.filter(c => c.agent_name === agent.name).length
   })).sort((a, b) => b.agentObjects - a.agentObjects)
 
+  // Форматирование чисел и телефона
   const formatNumber = (val) => val ? val.toString().replace(/\s/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, " ") : ''
-  
   const formatPhoneNumber = (v) => {
-    if (!v) return v
     const n = v.replace(/[^\d]/g, '')
+    if (!n) return ''
     return `+${n.slice(0, 1)} ${n.slice(1, 4)} ${n.slice(4, 7)} ${n.slice(7, 9)} ${n.slice(9, 11)}`
   }
 
+  // Вход / Регистрация
   const handleLogin = async () => {
     if (agentName && agentPhone) {
       await supabase.from('agents').upsert({ name: agentName, phone: agentPhone }, { onConflict: 'name' })
       setLoggedIn(true)
+    } else {
+      alert("Заполните имя и телефон")
     }
   }
 
+  // Добавление Объекта
   const addObject = async () => {
     const { error } = await supabase.from('objects').insert([{ 
       ...newObject, 
@@ -71,19 +78,27 @@ export default function HomePage() {
     if (!error) {
       setNewObject({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
       alert("Объект опубликован")
+      fetchData()
     } else alert("Ошибка: " + error.message)
   }
 
+  // Добавление Клиента
   const addClient = async () => {
     const { error } = await supabase.from('clients').insert([{
-      ...newClient,
+      type: newClient.type,
       budgetFrom: parseInt(newClient.budgetFrom.toString().replace(/\s/g, '') || 0),
       budgetTo: parseInt(newClient.budgetTo.toString().replace(/\s/g, '') || 0),
+      roomsFrom: newClient.roomsFrom,
+      roomsTo: newClient.roomsTo,
+      areaFrom: newClient.areaFrom,
+      areaTo: newClient.areaTo,
+      district: newClient.district,
       agent_name: agentName
     }])
     if (!error) {
       setNewClient({ type: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', areaFrom: '', areaTo: '', district: 'Ленинский' })
       alert("Заявка сохранена")
+      fetchData()
     } else alert("Ошибка: " + error.message)
   }
 
@@ -187,7 +202,6 @@ export default function HomePage() {
               <button className={registryTab === 'objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('objects')}>Объекты</button>
               <button className={registryTab === 'clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('clients')}>Клиенты</button>
               <button className={registryTab === 'agents' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('agents')}>Агенты</button>
-              <button className={registryTab === 'matches' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('matches')}>Матчи</button>
             </div>
             <div className="list-section">
               {registryTab === 'objects' && objects.map(o => (
@@ -232,7 +246,7 @@ export default function HomePage() {
         .form-input { padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; width: 100%; outline: none; background: #f9f9f9; }
         .dual-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; width: 100%; }
-        .registry-nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 15px; }
+        .registry-nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 15px; }
         .reg-btn { padding: 10px 2px; border: 1px solid #000; border-radius: 8px; background: transparent; font-weight: bold; cursor: pointer; font-size: 11px; }
         .reg-btn.active { background: #000; color: #fff; }
         .registry-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; position: relative; }
@@ -256,4 +270,5 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-                }
+                  }
+                

@@ -31,11 +31,8 @@ export default function HomePage() {
   const [clients, setClients] = useState([])
   const [agentsList, setAgentsList] = useState([])
 
-  const [filterPriceFrom, setFilterPriceFrom] = useState('')
-  const [filterPriceTo, setFilterPriceTo] = useState('')
-
   const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
-  const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
+  const [newClient, setNewClient] = useState({ type: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', areaFrom: '', areaTo: '', district: 'Ленинский' })
 
   const fetchData = useCallback(async () => {
     const { data: o } = await supabase.from('objects').select('*').order('created_at', { ascending: false })
@@ -57,10 +54,9 @@ export default function HomePage() {
     }
   }, [loggedIn, fetchData])
 
-  // Расширенная статистика для списка агентов
   const agentsWithStats = [...agentsList].map(agent => {
-    const agentObjects = objects.filter(o => o.agent === agent.name).length
-    const agentClients = clients.filter(c => c.agent === agent.name).length
+    const agentObjects = objects.filter(o => o.agent_name === agent.name).length
+    const agentClients = clients.filter(c => c.agent_name === agent.name).length
     return { ...agent, agentObjects, agentClients }
   }).sort((a, b) => b.agentObjects - a.agentObjects)
 
@@ -91,33 +87,36 @@ export default function HomePage() {
 
   const addObject = async () => {
     if (!newObject.price) return alert("Введите цену")
-    const { error } = await supabase.from('objects').insert([{ ...newObject, agent: agentName }])
+    const { error } = await supabase.from('objects').insert([{ 
+      ...newObject, 
+      price: parseInt(newObject.price.toString().replace(/\s/g, '')),
+      agent_name: agentName 
+    }])
     if (!error) {
       setNewObject({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
       alert("Объект опубликован")
+      fetchData()
     }
   }
 
   const addClient = async () => {
     const { error } = await supabase.from('clients').insert([{
-      propertyType: newClient.propertyType,
-      budgetFrom: newClient.budgetFrom,
-      budgetTo: newClient.budgetTo,
+      type: newClient.type,
+      budgetFrom: parseInt(newClient.budgetFrom.toString().replace(/\s/g, '') || 0),
+      budgetTo: parseInt(newClient.budgetTo.toString().replace(/\s/g, '') || 0),
       roomsFrom: newClient.roomsFrom,
       roomsTo: newClient.roomsTo,
-      floorFrom: newClient.floorFrom,
-      floorTo: newClient.floorTo,
       areaFrom: newClient.areaFrom,
       areaTo: newClient.areaTo,
       district: newClient.district,
-      address: newClient.address,
-      agent: agentName
+      agent_name: agentName
     }])
     if (!error) {
-      setNewClient({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
+      setNewClient({ type: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', areaFrom: '', areaTo: '', district: 'Ленинский' })
       alert("Заявка клиента сохранена")
+      fetchData()
     } else {
-      alert("Ошибка при сохранении клиента")
+      alert("Ошибка: " + error.message)
     }
   }
 
@@ -147,8 +146,8 @@ export default function HomePage() {
             <div>
               <p className="group-label">МОИ ПОКАЗАТЕЛИ</p>
               <div className="stats-grid-3">
-                <div className="stat-box-simple"><h3>{clients.filter(c => c.agent === agentName).length}</h3><span>Клиенты</span></div>
-                <div className="stat-box-simple"><h3>{objects.filter(o => o.agent === agentName).length}</h3><span>Объекты</span></div>
+                <div className="stat-box-simple"><h3>{clients.filter(c => c.agent_name === agentName).length}</h3><span>Клиенты</span></div>
+                <div className="stat-box-simple"><h3>{objects.filter(o => o.agent_name === agentName).length}</h3><span>Объекты</span></div>
                 <div className="stat-box-simple"><h3>0</h3><span>Матчи</span></div>
               </div>
             </div>
@@ -196,7 +195,7 @@ export default function HomePage() {
           <div className="form-container">
             <h2>Заявка покупателя</h2>
             <div className="form-stack">
-              <select className="form-input" value={newClient.propertyType} onChange={e => setNewClient({...newClient, propertyType: e.target.value})}><option>Квартира</option><option>Дом</option></select>
+              <select className="form-input" value={newClient.type} onChange={e => setNewClient({...newClient, type: e.target.value})}><option>Квартира</option><option>Дом</option></select>
               <div className="dual-input">
                 <input className="form-input" placeholder="Цена от (₽)" value={formatNumber(newClient.budgetFrom)} onChange={e => setNewClient({...newClient, budgetFrom: e.target.value.replace(/\s/g, '')})} />
                 <input className="form-input" placeholder="Цена до (₽)" value={formatNumber(newClient.budgetTo)} onChange={e => setNewClient({...newClient, budgetTo: e.target.value.replace(/\s/g, '')})} />
@@ -209,12 +208,7 @@ export default function HomePage() {
                 <input className="form-input" placeholder="Комнат от" value={newClient.roomsFrom} onChange={e => setNewClient({...newClient, roomsFrom: e.target.value})} />
                 <input className="form-input" placeholder="Комнат до" value={newClient.roomsTo} onChange={e => setNewClient({...newClient, roomsTo: e.target.value})} />
               </div>
-              <div className="dual-input">
-                <input className="form-input" placeholder="Этаж от" value={newClient.floorFrom} onChange={e => setNewClient({...newClient, floorFrom: e.target.value})} />
-                <input className="form-input" placeholder="Этаж до" value={newClient.floorTo} onChange={e => setNewClient({...newClient, floorTo: e.target.value})} />
-              </div>
               <select className="form-input" value={newClient.district} onChange={e => setNewClient({...newClient, district: e.target.value})}><option>Ленинский</option><option>Кировский</option><option>Московский</option></select>
-              <input className="form-input" placeholder="Комментарий / Адрес" value={newClient.address} onChange={e => setNewClient({...newClient, address: e.target.value})} />
               <button className="save-btn" onClick={addClient}>СОХРАНИТЬ ЗАЯВКУ</button>
             </div>
           </div>
@@ -232,13 +226,13 @@ export default function HomePage() {
               {registryTab === 'objects' && objects.map(o => (
                 <div className="registry-card" key={o.id}>
                   <h3>{o.type}</h3><p>{o.rooms} комн • {o.area}м² • Этаж {o.floor}</p>
-                  <p>{o.district}, {o.address}</p><strong>{formatNumber(o.price)} ₽</strong><span>{o.agent}</span>
+                  <p>{o.district}, {o.address}</p><strong>{formatNumber(o.price)} ₽</strong><span>{o.agent_name}</span>
                 </div>
               ))}
               {registryTab === 'clients' && clients.map(c => (
                 <div className="registry-card" key={c.id}>
-                  <h3>Поиск: {c.propertyType}</h3><p>Бюджет: {formatNumber(c.budgetFrom)} - {formatNumber(c.budgetTo)} ₽</p>
-                  <p>{c.roomsFrom}-{c.roomsTo} комн • Район: {c.district}</p><span>{c.agent}</span>
+                  <h3>Поиск: {c.type}</h3><p>Бюджет: {formatNumber(c.budgetFrom)} - {formatNumber(c.budgetTo)} ₽</p>
+                  <p>{c.roomsFrom}-{c.roomsTo} комн • Район: {c.district}</p><span>{c.agent_name}</span>
                 </div>
               ))}
               {registryTab === 'agents' && agentsWithStats.map(a => (
@@ -299,5 +293,5 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-              }
-            
+                }
+                

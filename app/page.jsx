@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import {
   Home,
@@ -37,26 +37,38 @@ export default function HomePage() {
   const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
   const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
 
-  useEffect(() => {
-    if (loggedIn) {
-      fetchData()
-      const obsChannel = supabase.channel('realtime-obs').on('postgres_changes', { event: '*', schema: 'public', table: 'objects' }, () => fetchData()).subscribe()
-      const clsChannel = supabase.channel('realtime-cls').on('postgres_changes', { event: '*', schema: 'public', table: 'clients' }, () => fetchData()).subscribe()
-      return () => {
-        supabase.removeChannel(obsChannel)
-        supabase.removeChannel(clsChannel)
-      }
-    }
-  }, [loggedIn])
-
-  async function fetchData() {
+  // Вынес загрузку в useCallback для стабильности
+  const fetchData = useCallback(async () => {
     const { data: o } = await supabase.from('objects').select('*').order('created_at', { ascending: false })
     const { data: c } = await supabase.from('clients').select('*').order('created_at', { ascending: false })
     const { data: a } = await supabase.from('agents').select('*').order('created_at', { ascending: false })
     if (o) setObjects(o)
     if (c) setClients(c)
     if (a) setAgentsList(a)
-  }
+  }, [])
+
+  useEffect(() => {
+    if (loggedIn) {
+      fetchData()
+
+      // Единая подписка на все изменения в схеме public
+      const channel = supabase
+        .channel('schema-db-changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public' },
+          (payload) => {
+            console.log('Change received!', payload)
+            fetchData() // Перезагружаем данные при любом изменении
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    }
+  }, [loggedIn, fetchData])
 
   const formatNumber = (val) => {
     if (!val) return ''
@@ -287,6 +299,5 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-}
-
-                  
+                  }
+          

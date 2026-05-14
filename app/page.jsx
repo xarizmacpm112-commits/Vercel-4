@@ -3,16 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import {
-  Home,
-  Building2,
-  Users,
-  ClipboardList,
-  Search,
-  User,
-  Trophy,
-  Medal,
-  ChevronDown,
-  ChevronUp
+  Home, Building2, Users, ClipboardList, User, Trophy, Medal
 } from 'lucide-react'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ptidjrjpuhgfmoshauel.supabase.co'
@@ -23,7 +14,6 @@ export default function HomePage() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [activeTab, setActiveTab] = useState('home')
   const [registryTab, setRegistryTab] = useState('objects')
-  const [showFilters, setShowFilters] = useState(false)
   const [agentName, setAgentName] = useState('')
   const [agentPhone, setAgentPhone] = useState('')
 
@@ -46,35 +36,22 @@ export default function HomePage() {
   useEffect(() => {
     if (loggedIn) {
       fetchData()
-      const channel = supabase
-        .channel('schema-db-changes')
-        .on('postgres_changes', { event: '*', schema: 'public' }, () => fetchData())
-        .subscribe()
+      const channel = supabase.channel('schema-db-changes').on('postgres_changes', { event: '*', schema: 'public' }, () => fetchData()).subscribe()
       return () => { supabase.removeChannel(channel) }
     }
   }, [loggedIn, fetchData])
 
-  const agentsWithStats = [...agentsList].map(agent => {
-    const agentObjects = objects.filter(o => o.agent_name === agent.name).length
-    const agentClients = clients.filter(c => c.agent_name === agent.name).length
-    return { ...agent, agentObjects, agentClients }
-  }).sort((a, b) => b.agentObjects - a.agentObjects)
+  const agentsWithStats = [...agentsList].map(agent => ({
+    ...agent,
+    agentObjects: objects.filter(o => o.agent_name === agent.name).length,
+    agentClients: clients.filter(c => c.agent_name === agent.name).length
+  })).sort((a, b) => b.agentObjects - a.agentObjects)
 
-  const topThreeAgents = agentsWithStats.slice(0, 3)
-
-  const formatNumber = (val) => {
-    if (!val) return ''
-    return val.toString().replace(/\s/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, " ")
-  }
-
+  const formatNumber = (val) => val ? val.toString().replace(/\s/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, " ") : ''
+  
   const formatPhoneNumber = (v) => {
     if (!v) return v
     const n = v.replace(/[^\d]/g, '')
-    const l = n.length
-    if (l < 2) return `+${n}`
-    if (l < 5) return `+${n.slice(0, 1)} ${n.slice(1)}`
-    if (l < 8) return `+${n.slice(0, 1)} ${n.slice(1, 4)} ${n.slice(4)}`
-    if (l < 10) return `+${n.slice(0, 1)} ${n.slice(1, 4)} ${n.slice(4, 7)} ${n.slice(7)}`
     return `+${n.slice(0, 1)} ${n.slice(1, 4)} ${n.slice(4, 7)} ${n.slice(7, 9)} ${n.slice(9, 11)}`
   }
 
@@ -86,38 +63,28 @@ export default function HomePage() {
   }
 
   const addObject = async () => {
-    if (!newObject.price) return alert("Введите цену")
     const { error } = await supabase.from('objects').insert([{ 
       ...newObject, 
-      price: parseInt(newObject.price.toString().replace(/\s/g, '')),
+      price: parseInt(newObject.price.toString().replace(/\s/g, '') || 0),
       agent_name: agentName 
     }])
     if (!error) {
       setNewObject({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
       alert("Объект опубликован")
-      fetchData()
-    }
+    } else alert("Ошибка: " + error.message)
   }
 
   const addClient = async () => {
     const { error } = await supabase.from('clients').insert([{
-      type: newClient.type,
+      ...newClient,
       budgetFrom: parseInt(newClient.budgetFrom.toString().replace(/\s/g, '') || 0),
       budgetTo: parseInt(newClient.budgetTo.toString().replace(/\s/g, '') || 0),
-      roomsFrom: newClient.roomsFrom,
-      roomsTo: newClient.roomsTo,
-      areaFrom: newClient.areaFrom,
-      areaTo: newClient.areaTo,
-      district: newClient.district,
       agent_name: agentName
     }])
     if (!error) {
       setNewClient({ type: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', areaFrom: '', areaTo: '', district: 'Ленинский' })
-      alert("Заявка клиента сохранена")
-      fetchData()
-    } else {
-      alert("Ошибка: " + error.message)
-    }
+      alert("Заявка сохранена")
+    } else alert("Ошибка: " + error.message)
   }
 
   if (!loggedIn) {
@@ -161,7 +128,7 @@ export default function HomePage() {
             </div>
             <div className="agents-section">
               <div className="section-title"><Trophy size={18} /> Топ-3 агента</div>
-              {topThreeAgents.map((agent, i) => (
+              {agentsWithStats.slice(0, 3).map((agent, i) => (
                 <div key={agent.id} className="agent-rank-card">
                   <div style={{ width: '30px', fontWeight: 'bold' }}>{i + 1}</div>
                   <div style={{ flex: 1 }}>
@@ -217,10 +184,10 @@ export default function HomePage() {
         {activeTab === 'registry' && (
           <>
             <div className="registry-nav-grid">
-              <button className={registryTab === 'objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('objects'); setShowFilters(false); }}>Объекты</button>
-              <button className={registryTab === 'clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('clients'); setShowFilters(false); }}>Клиенты</button>
-              <button className={registryTab === 'agents' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('agents'); setShowFilters(false); }}>Агенты</button>
-              <button className={registryTab === 'matches' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('matches'); setShowFilters(false); }}>Матчи</button>
+              <button className={registryTab === 'objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('objects')}>Объекты</button>
+              <button className={registryTab === 'clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('clients')}>Клиенты</button>
+              <button className={registryTab === 'agents' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('agents')}>Агенты</button>
+              <button className={registryTab === 'matches' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('matches')}>Матчи</button>
             </div>
             <div className="list-section">
               {registryTab === 'objects' && objects.map(o => (
@@ -237,14 +204,10 @@ export default function HomePage() {
               ))}
               {registryTab === 'agents' && agentsWithStats.map(a => (
                 <div className="registry-card" key={a.id}>
-                  <h3>{a.name}</h3>
-                  <p>{a.phone}</p>
-                  <p style={{fontSize: '11px', marginTop: '6px', color: '#000', fontWeight: 'bold'}}>
-                    Объектов: {a.agentObjects} | Клиентов: {a.agentClients}
-                  </p>
+                  <h3>{a.name}</h3><p>{a.phone}</p>
+                  <p style={{fontSize: '11px', marginTop: '6px', color: '#000', fontWeight: 'bold'}}>Объектов: {a.agentObjects} | Клиентов: {a.agentClients}</p>
                 </div>
               ))}
-              {registryTab === 'matches' && <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Активных матчей нет</div>}
             </div>
           </>
         )}
@@ -294,4 +257,3 @@ export default function HomePage() {
     </main>
   )
                 }
-                

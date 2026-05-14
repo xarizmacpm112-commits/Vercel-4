@@ -23,14 +23,25 @@ export default function HomePage() {
   const [agentName, setAgentName] = useState('')
   const [agentPhone, setAgentPhone] = useState('')
 
-  // Функция для форматирования чисел с пробелами: 1 000 000
+  // Состояния для фильтров реестра
+  const [fPriceFrom, setFPriceFrom] = useState('')
+  const [fPriceTo, setFPriceTo] = useState('')
+  const [fAreaFrom, setFAreaFrom] = useState('')
+  const [fAreaTo, setFAreaTo] = useState('')
+  const [fRoomsFrom, setFRoomsFrom] = useState('')
+  const [fRoomsTo, setFRoomsTo] = useState('')
+  const [fFloorFrom, setFFloorFrom] = useState('')
+  const [fFloorTo, setFFloorTo] = useState('')
+  const [fDistrict, setFDistrict] = useState('Все районы')
+
+  // Функция для форматирования чисел с пробелами
   const formatNumber = (val) => {
     if (!val) return ''
     let number = val.toString().replace(/\s/g, '')
     return number.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
   }
 
-  // Функция для форматирования телефона: +7 999 000 00 00
+  // Функция для форматирования телефона
   const formatPhoneNumber = (value) => {
     if (!value) return value;
     const phoneNumber = value.replace(/[^\d]/g, '');
@@ -42,11 +53,9 @@ export default function HomePage() {
     return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7, 9)} ${phoneNumber.slice(9, 11)}`;
   };
 
-  // ПУСТАЯ БАЗА ДАННЫХ ПРИ СТАРТЕ
   const [objects, setObjects] = useState([])
   const [clients, setClients] = useState([])
 
-  // Динамический расчет ТОП-3 агентов
   const topAgents = useMemo(() => {
     const stats = {};
     objects.forEach(obj => {
@@ -205,26 +214,29 @@ export default function HomePage() {
                       <select className="form-input"><option>Все типы</option><option>Квартира</option><option>Дом</option></select>
                       
                       <div className="dual-input">
-                        <input className="form-input" placeholder="Цена от (₽)" onChange={e => e.target.value = formatNumber(e.target.value.replace(/\s/g, ''))} />
-                        <input className="form-input" placeholder="Цена до (₽)" onChange={e => e.target.value = formatNumber(e.target.value.replace(/\s/g, ''))} />
+                        <input className="form-input" placeholder="Цена от (₽)" value={formatNumber(fPriceFrom)} onChange={e => setFPriceFrom(e.target.value.replace(/\s/g, ''))} />
+                        <input className="form-input" placeholder="Цена до (₽)" value={formatNumber(fPriceTo)} onChange={e => setFPriceTo(e.target.value.replace(/\s/g, ''))} />
                       </div>
 
                       <div className="dual-input">
-                        <input className="form-input" placeholder="Кв² от" />
-                        <input className="form-input" placeholder="Кв² до" />
+                        <input className="form-input" placeholder="Кв² от" value={fAreaFrom} onChange={e => setFAreaFrom(e.target.value)} />
+                        <input className="form-input" placeholder="Кв² до" value={fAreaTo} onChange={e => setFAreaTo(e.target.value)} />
                       </div>
 
                       <div className="dual-input">
-                        <input className="form-input" placeholder="Комнат от" />
-                        <input className="form-input" placeholder="Комнат до" />
+                        <input className="form-input" placeholder="Комнат от" value={fRoomsFrom} onChange={e => setFRoomsFrom(e.target.value)} />
+                        <input className="form-input" placeholder="Комнат до" value={fRoomsTo} onChange={e => setFRoomsTo(e.target.value)} />
                       </div>
 
                       <div className="dual-input">
-                        <input className="form-input" placeholder="Этаж от" />
-                        <input className="form-input" placeholder="Этаж до" />
+                        <input className="form-input" placeholder="Этаж от" value={fFloorFrom} onChange={e => setFFloorFrom(e.target.value)} />
+                        <input className="form-input" placeholder="Этаж до" value={fFloorTo} onChange={e => setFFloorTo(e.target.value)} />
                       </div>
 
-                      <select className="form-input"><option>Все районы</option><option>Ленинский</option><option>Кировский</option><option>Московский</option></select>
+                      <select className="form-input" value={fDistrict} onChange={e => setFDistrict(e.target.value)}>
+                        <option>Все районы</option><option>Ленинский</option><option>Кировский</option><option>Московский</option>
+                      </select>
+                      
                       <button className="save-btn" onClick={() => setShowFilters(false)}>НАЙТИ</button>
                     </div>
                   </div>
@@ -293,12 +305,4 @@ export default function HomePage() {
         .topbar h1 { margin: 0; font-size: 20px; }
         .profile-btn { background: none; border: none; cursor: pointer; }
         .content { padding: 20px; }
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; height: 70px; background: #fff; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; z-index: 100; }
-        .bottom-nav button { background: none; border: none; color: #ccc; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
-        .bottom-nav button.active { color: #000; }
-        .bottom-nav span { font-size: 10px; font-weight: bold; }
-        .login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; padding: 20px; }
-        .login-card { background: #fff; padding: 40px 20px; border-radius: 20px; width: 100%; text-align: center; }
-        .login-card h1 { margin-bottom: 30px; }
-        .login-card input { padding: 15px; width: 100%; border-radius: 10px; border: 1px solid #eee; margin-bottom: 15px; outline: none; background: #f9f9f9; }
-        .login-card button { width: 100%; padding: 16px; background: #000; color: #fff; border: none
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; height: 70px; background: #fff; display: flex; justify-content:

@@ -15,7 +15,6 @@ import {
   ChevronUp
 } from 'lucide-react'
 
-// Конфигурация Supabase
 const NEXT_PUBLIC_SUPABASE_URL = "https://ptidjrjpuhgfmoshauel.supabase.co"
 const NEXT_PUBLIC_SUPABASE_ANON_KEY = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB0aWRqcmpwdWhnZm1vc2hhdWVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODA4MTAsImV4cCI6MjA5MzY1NjgxMH0.9zUWm7Gv30ORwWXMOpJHsdmoMhHPQVPi-kgyFyt-Vtw"
 
@@ -30,7 +29,6 @@ export default function HomePage() {
   const [agentName, setAgentName] = useState('')
   const [agentPhone, setAgentPhone] = useState('')
 
-  // Данные из трех таблиц
   const [objects, setObjects] = useState([])
   const [clients, setClients] = useState([])
   const [allAgents, setAllAgents] = useState([])
@@ -42,9 +40,7 @@ export default function HomePage() {
   }, [loggedIn])
 
   const fetchAllData = async () => {
-    fetchObjects()
-    fetchClients()
-    fetchAgents()
+    await Promise.all([fetchObjects(), fetchClients(), fetchAgents()])
   }
 
   const fetchObjects = async () => {
@@ -58,15 +54,13 @@ export default function HomePage() {
   }
 
   const fetchAgents = async () => {
-    const { data } = await supabase.from('agents').select('*').order('name', { ascending: true })
+    const { data } = await supabase.from('agents').select('*').order('created_at', { ascending: false })
     if (data) setAllAgents(data)
   }
 
-  // --- ИЗМЕНЕННАЯ ФУНКЦИЯ ВХОДА ---
   const handleLogin = async () => {
     if (!agentName || !agentPhone) return alert("Заполните данные")
     
-    // Использование maybeSingle вместо single предотвращает ошибку, если агент не найден
     const { data: existingAgent } = await supabase
       .from('agents')
       .select('*')
@@ -74,10 +68,12 @@ export default function HomePage() {
       .maybeSingle()
 
     if (!existingAgent) {
-      await supabase.from('agents').insert([{ name: agentName, phone: agentPhone }])
+      const { error } = await supabase.from('agents').insert([{ name: agentName, phone: agentPhone }])
+      if (error) return alert("Ошибка регистрации")
     }
     
     setLoggedIn(true)
+    fetchAllData() // Обновляем данные сразу после входа
   }
 
   const formatNumber = (val) => {
@@ -87,18 +83,10 @@ export default function HomePage() {
   }
 
   const formatPhoneNumber = (value) => {
-    if (!value) return value;
     const phoneNumber = value.replace(/[^\d]/g, '');
-    const phoneNumberLength = phoneNumber.length;
-    if (phoneNumberLength < 2) return `+${phoneNumber}`;
-    if (phoneNumberLength < 5) return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1)}`;
-    if (phoneNumberLength < 8) return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4)}`;
-    if (phoneNumberLength < 10) return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7)}`;
-    return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7, 9)} ${phoneNumber.slice(9, 11)}`;
+    if (phoneNumber.length < 1) return '';
+    return `+${phoneNumber.slice(0, 11)}`;
   };
-
-  const [filterPriceFrom, setFilterPriceFrom] = useState('')
-  const [filterPriceTo, setFilterPriceTo] = useState('')
 
   const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
   const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
@@ -107,18 +95,22 @@ export default function HomePage() {
     if(!newObject.price) return alert("Введите цену");
     const { error } = await supabase.from('objects').insert([{ ...newObject, agent: agentName }])
     if (!error) {
-      await fetchObjects()
+      await fetchObjects() // Мгновенное обновление
       setNewObject({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
       alert("Объект добавлен")
+    } else {
+      alert("Ошибка при добавлении объекта")
     }
   }
 
   const addClient = async () => {
     const { error } = await supabase.from('clients').insert([{ ...newClient, agent: agentName }])
     if (!error) {
-      await fetchClients()
+      await fetchClients() // Мгновенное обновление
       setNewClient({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
       alert("Заявка добавлена")
+    } else {
+      alert("Ошибка при добавлении заявки")
     }
   }
 
@@ -143,7 +135,6 @@ export default function HomePage() {
       </header>
 
       <section className="content" style={{ paddingBottom: '100px' }}>
-        
         {activeTab === 'home' && (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
@@ -168,7 +159,7 @@ export default function HomePage() {
             <div className="agents-section">
               <div className="section-title"><Trophy size={18} /> Список агентов</div>
               {allAgents.map((agent, index) => (
-                <div key={agent.name} className="agent-rank-card">
+                <div key={agent.id} className="agent-rank-card">
                   <div style={{ width: '30px', fontWeight: 'bold', color: '#000' }}>{index + 1}</div>
                   <div style={{ flex: 1 }}>
                     <h3 style={{ margin: 0, fontSize: '16px' }}>{agent.name}</h3>
@@ -206,11 +197,6 @@ export default function HomePage() {
                 <input className="form-input" placeholder="Цена от (₽)" value={formatNumber(newClient.budgetFrom)} onChange={e => setNewClient({...newClient, budgetFrom: e.target.value.replace(/\s/g, '')})} />
                 <input className="form-input" placeholder="Цена до (₽)" value={formatNumber(newClient.budgetTo)} onChange={e => setNewClient({...newClient, budgetTo: e.target.value.replace(/\s/g, '')})} />
               </div>
-              <div className="dual-input"><input className="form-input" placeholder="Кв² от" onChange={e => setNewClient({...newClient, areaFrom: e.target.value})} /><input className="form-input" placeholder="Кв² до" onChange={e => setNewClient({...newClient, areaTo: e.target.value})} /></div>
-              <div className="dual-input"><input className="form-input" placeholder="Комнат от" onChange={e => setNewClient({...newClient, roomsFrom: e.target.value})} /><input className="form-input" placeholder="Комнат до" onChange={e => setNewClient({...newClient, roomsTo: e.target.value})} /></div>
-              <div className="dual-input"><input className="form-input" placeholder="Этаж от" onChange={e => setNewClient({...newClient, floorFrom: e.target.value})} /><input className="form-input" placeholder="Этаж до" onChange={e => setNewClient({...newClient, floorTo: e.target.value})} /></div>
-              <select className="form-input" value={newClient.district} onChange={e => setNewClient({...newClient, district: e.target.value})}><option>Ленинский</option><option>Кировский</option><option>Московский</option></select>
-              <input className="form-input" placeholder="Адрес" onChange={e => setNewClient({...newClient, address: e.target.value})} />
               <button className="save-btn" onClick={addClient}>СОХРАНИТЬ ЗАЯВКУ</button>
             </div>
           </div>
@@ -222,26 +208,22 @@ export default function HomePage() {
               <button className={registryTab === 'objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('objects')}>Объекты</button>
               <button className={registryTab === 'clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('clients')}>Клиенты</button>
               <button className={registryTab === 'agents' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('agents')}>Агенты</button>
-              <button className={registryTab === 'matches' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('matches')}>Матчи</button>
             </div>
-
             <div className="list-section">
               {registryTab === 'objects' && objects.map(obj => (
                 <div className="registry-card" key={obj.id}>
-                  <h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м²</p>
-                  <p>{obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><span>{obj.agent}</span>
+                  <h3>{obj.type}</h3><p>{obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><span>{obj.agent}</span>
                 </div>
               ))}
               {registryTab === 'clients' && clients.map(cl => (
                 <div className="registry-card" key={cl.id}>
-                  <h3>Поиск: {cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetFrom)} - {formatNumber(cl.budgetTo)} ₽</p>
+                  <h3>{cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetFrom)} ₽</p>
                   <span>{cl.agent}</span>
                 </div>
               ))}
               {registryTab === 'agents' && allAgents.map(a => (
                 <div className="registry-card" key={a.id}><h3>{a.name}</h3><p>{a.phone}</p></div>
               ))}
-              {registryTab === 'matches' && <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Нет матчей</div>}
             </div>
           </>
         )}
@@ -255,39 +237,24 @@ export default function HomePage() {
       </nav>
 
       <style jsx>{`
-        .group-label { font-size: 12px; font-weight: bold; color: #666; margin-bottom: 8px; text-transform: uppercase; }
-        .stats-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .stat-box-simple { border: 1px solid #eee; padding: 10px; border-radius: 12px; text-align: center; background: #fff; }
-        .stat-box-simple h3 { margin: 0; font-size: 18px; }
-        .stat-box-simple span { font-size: 10px; color: #888; text-transform: uppercase; }
-        .agent-rank-card { display: flex; align-items: center; background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #eee; }
-        .form-container { background: #fff; padding: 20px; border-radius: 15px; border: 1px solid #eee; }
-        .form-stack { display: flex; flex-direction: column; gap: 10px; }
-        .form-input { padding: 12px; border-radius: 8px; border: 1px solid #ddd; width: 100%; outline: none; background: #f9f9f9; }
-        .dual-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; width: 100%; }
-        .registry-nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        @media (min-width: 400px) { .registry-nav-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
-        .reg-btn { padding: 12px 5px; border: 1px solid #000; border-radius: 8px; background: transparent; font-weight: bold; cursor: pointer; font-size: 12px; }
-        .reg-btn.active { background: #000; color: #fff; }
-        .registry-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; position: relative; }
-        .registry-card h3 { margin: 0 0 5px; font-size: 16px; }
-        .registry-card p { margin: 0; font-size: 13px; color: #666; }
-        .registry-card strong { display: block; margin-top: 5px; color: #000; }
-        .registry-card span { position: absolute; right: 15px; top: 15px; font-size: 11px; color: #aaa; }
         .crm-container { max-width: 500px; margin: 0 auto; background: #fcfcfc; min-height: 100vh; font-family: sans-serif; }
         .topbar { padding: 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         .content { padding: 20px; }
         .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; height: 70px; background: #fff; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; }
         .bottom-nav button { background: none; border: none; color: #ccc; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .bottom-nav button.active { color: #000; }
-        .bottom-nav span { font-size: 10px; font-weight: bold; }
+        .form-input { padding: 12px; border-radius: 8px; border: 1px solid #ddd; width: 100%; margin-bottom: 10px; background: #f9f9f9; }
+        .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; width: 100%; border: none; font-weight: bold; cursor: pointer; }
+        .stat-box-simple { border: 1px solid #eee; padding: 10px; border-radius: 12px; text-align: center; background: #fff; }
+        .stats-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; padding: 20px; }
-        .login-card { background: #fff; padding: 40px 20px; border-radius: 20px; width: 100%; text-align: center; }
-        .login-card input { padding: 15px; width: 100%; border-radius: 10px; border: 1px solid #eee; margin-bottom: 15px; background: #f9f9f9; }
-        .login-card button { width: 100%; padding: 16px; background: #000; color: #fff; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; }
+        .login-card { background: #fff; padding: 40px; border-radius: 20px; width: 100%; text-align: center; }
+        .registry-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; }
+        .reg-btn { padding: 10px; border: 1px solid #000; border-radius: 8px; background: transparent; font-size: 12px; }
+        .reg-btn.active { background: #000; color: #fff; }
+        .registry-nav-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .group-label { font-size: 12px; font-weight: bold; color: #666; margin-bottom: 8px; }
       `}</style>
     </main>
   )
-                  }
-                                  
+        }

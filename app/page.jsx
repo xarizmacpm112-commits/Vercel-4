@@ -12,7 +12,8 @@ import {
   Trophy,
   Medal,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Trash2
 } from 'lucide-react'
 
 const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -24,6 +25,7 @@ export default function HomePage() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [activeTab, setActiveTab] = useState('home')
   const [registryTab, setRegistryTab] = useState('objects')
+  const [profileTab, setProfileTab] = useState('my-objects')
   const [showFilters, setShowFilters] = useState(false)
 
   const [agentName, setAgentName] = useState('')
@@ -80,6 +82,20 @@ export default function HomePage() {
   const fetchAgents = async () => {
     const { data, error } = await supabase.from('agents').select('*').order('name', { ascending: true })
     if (!error && data) setAllAgents(data)
+  }
+
+  const deleteObject = async (id) => {
+    if (!confirm("Вы уверены, что хотите удалить этот объект?")) return
+    const { error } = await supabase.from('objects').delete().eq('id', id)
+    if (error) alert("Ошибка при удалении: " + error.message)
+    else fetchObjects()
+  }
+
+  const deleteClient = async (id) => {
+    if (!confirm("Вы уверены, что хотите удалить эту заявку?")) return
+    const { error } = await supabase.from('clients').delete().eq('id', id)
+    if (error) alert("Ошибка при удалении: " + error.message)
+    else fetchClients()
   }
 
   const handleLogin = async () => {
@@ -289,7 +305,7 @@ export default function HomePage() {
         <div>
           <h1>B2B GARANT</h1>
         </div>
-        <button className="profile-btn"><User size={20} /></button>
+        <button className={activeTab === 'profile' ? 'profile-btn active-prof' : 'profile-btn'} onClick={() => setActiveTab('profile')}><User size={20} /></button>
       </header>
 
       <section className="content" style={{ paddingBottom: '100px' }}>
@@ -339,7 +355,7 @@ export default function HomePage() {
             </div>
           </>
         )}
-                {activeTab === 'objects' && (
+                        {activeTab === 'objects' && (
           <div className="form-container">
             <h2>Выставить объект</h2>
             <div className="form-stack">
@@ -385,6 +401,55 @@ export default function HomePage() {
               </select>
               <input className="form-input" placeholder="Адрес" value={newClient.address} onChange={e => setNewClient({...newClient, address: e.target.value})} />
               <button className="save-btn" onClick={addClient}>СОХРАНИТЬ ЗАЯВКУ</button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'profile' && (
+          <div className="form-container">
+            <div style={{ marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+              <h2 style={{ margin: '0 0 5px 0' }}>{agentName}</h2>
+              <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>{agentPhone}</p>
+            </div>
+            
+            <div className="registry-nav-grid" style={{ marginBottom: '20px' }}>
+              <button className={profileTab === 'my-objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => setProfileTab('my-objects')}>Мои Объекты</button>
+              <button className={profileTab === 'my-clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => setProfileTab('my-clients')}>Мои Клиенты</button>
+            </div>
+
+            <div className="list-section">
+              {profileTab === 'my-objects' && (
+                objects.filter(o => o.agent === agentName).length === 0 ? (
+                  <p style={{ textAlign: 'center', color: '#888', padding: '20px' }}>У вас нет выставленных объектов</p>
+                ) : (
+                  objects.filter(o => o.agent === agentName).map(obj => (
+                    <div className="registry-card" key={obj.id}>
+                      <h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p>
+                      <p>{obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong>
+                      <button className="delete-card-btn" onClick={() => deleteObject(obj.id)}><Trash2 size={16} /></button>
+                    </div>
+                  ))
+                )
+              )}
+
+              {profileTab === 'my-clients' && (
+                clients.filter(c => c.agent === agentName).length === 0 ? (
+                  <p style={{ textAlign: 'center', color: '#888', padding: '20px' }}>У вас нет сохраненных заявок</p>
+                ) : (
+                  clients.filter(c => c.agent === agentName).map(cl => (
+                    <div className="registry-card" key={cl.id}>
+                      <h3>Поиск: {cl.propertytype || cl.propertyType}</h3>
+                      <p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p>
+                      <p>
+                        {(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн • 
+                        Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0}
+                      </p>
+                      <p>{cl.district}, {cl.address}</p>
+                      <button className="delete-card-btn" onClick={() => deleteClient(cl.id)}><Trash2 size={16} /></button>
+                    </div>
+                  ))
+                )
+              )}
             </div>
           </div>
         )}
@@ -452,8 +517,7 @@ export default function HomePage() {
                   <p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p>
                   <p>
                     {(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн • 
-                    Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0} • 
-                    Этаж: {(cl.floorfrom || cl.floorFrom) || 0}-{(cl.floorto || cl.floorTo) || 0}
+                    Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0}
                   </p>
                   <p>{cl.district}, {cl.address}</p><span>{cl.agent}</span>
                 </div>
@@ -532,7 +596,7 @@ export default function HomePage() {
         .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; border: none; width: 100%; }
         
         .registry-nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        @media (min-width: 400px) { .registry-nav-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+        @media (min-width: 400px) { .registry-nav-grid { grid-template-columns: 1fr 1fr; } }
         .reg-btn { padding: 12px 5px; border: 1px solid #000; border-radius: 8px; background: transparent; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 12px; }
         .reg-btn.active { background: #000; color: #fff; }
 
@@ -546,6 +610,8 @@ export default function HomePage() {
         .registry-card p { margin: 0; font-size: 13px; color: #666; }
         .registry-card strong { display: block; margin-top: 5px; color: #000; }
         .registry-card span { position: absolute; right: 15px; top: 15px; font-size: 11px; color: #aaa; }
+
+        .delete-card-btn { position: absolute; right: 15px; top: 15px; background: none; border: none; color: #ff4d4d; cursor: pointer; padding: 5px; }
 
         .agent-row-card { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 14px 16px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 8px; }
         .agent-info-side h3 { margin: 0 0 4px 0; font-size: 15px; color: #000; font-weight: 600; }
@@ -566,23 +632,4 @@ export default function HomePage() {
         .match-side .m-agent { display: block; font-size: 10px; color: #999; }
         .match-divider { width: 1px; background: #eee; }
 
-        .crm-container { max-width: 500px; margin: 0 auto; background: #fcfcfc; min-height: 100vh; font-family: sans-serif; }
-        .topbar { padding: 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .topbar h1 { margin: 0; font-size: 20px; }
-        .profile-btn { background: none; border: none; cursor: pointer; }
-        .content { padding: 20px; }
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; height: 70px; background: #fff; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; z-index: 100; }
-        .bottom-nav button { background: none; border: none; color: #ccc; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
-        .bottom-nav button.active { color: #000; }
-        .bottom-nav span { font-size: 10px; font-weight: bold; }
-        
-        .login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; padding: 20px; }
-        .login-card { background: #fff; padding: 40px 20px; border-radius: 20px; width: 100%; text-align: center; }
-        .login-card h1 { margin-bottom: 30px; }
-        .login-card input { padding: 15px; width: 100%; border-radius: 10px; border: 1px solid #eee; margin-bottom: 15px; outline: none; background: #f9f9f9; }
-        .login-card button { width: 100%; padding: 16px; background: #000; color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-      `}</style>
-    </main>
-  )
-                    }
-                     
+        .crm                                                     

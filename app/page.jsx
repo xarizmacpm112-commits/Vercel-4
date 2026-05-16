@@ -127,7 +127,7 @@ export default function HomePage() {
     if (phoneNumberLength < 10) return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7)}`;
     return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7, 9)} ${phoneNumber.slice(9, 11)}`;
   };
-        const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
+    const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
   const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
 
   const addObject = async () => {
@@ -339,7 +339,7 @@ export default function HomePage() {
             </div>
           </>
         )}
-            {activeTab === 'objects' && (
+                {activeTab === 'objects' && (
           <div className="form-container">
             <h2>Выставить объект</h2>
             <div className="form-stack">
@@ -459,11 +459,14 @@ export default function HomePage() {
                 </div>
               ))}
               {registryTab === 'agents' && allAgents.map(a => (
-                <div className="registry-card" key={a.id}>
-                  <h3>{a.name}</h3>
-                  <p>{a.phone}</p>
-                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#666', borderTop: '1px solid #f5f5f5', paddingTop: '6px' }}>
-                    Объектов: <strong>{objects.filter(o => o.agent === a.name).length}</strong> | Клиентов: <strong>{clients.filter(c => c.agent === a.name).length}</strong>
+                <div className="agent-row-card" key={a.id}>
+                  <div className="agent-info-side">
+                    <h3>{a.name}</h3>
+                    <p>{a.phone}</p>
+                  </div>
+                  <div className="agent-stats-side">
+                    <div className="mini-badge">О: <span>{objects.filter(o => o.agent === a.name).length}</span></div>
+                    <div className="mini-badge">К: <span>{clients.filter(c => c.agent === a.name).length}</span></div>
                   </div>
                 </div>
               ))}
@@ -544,6 +547,13 @@ export default function HomePage() {
         .registry-card strong { display: block; margin-top: 5px; color: #000; }
         .registry-card span { position: absolute; right: 15px; top: 15px; font-size: 11px; color: #aaa; }
 
+        .agent-row-card { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 14px 16px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 8px; }
+        .agent-info-side h3 { margin: 0 0 4px 0; font-size: 15px; color: #000; font-weight: 600; }
+        .agent-info-side p { margin: 0; font-size: 13px; color: #666; }
+        .agent-stats-side { display: flex; gap: 8px; }
+        .mini-badge { background: #f5f5f5; border: 1px solid #e5e5e5; padding: 6px 10px; border-radius: 8px; font-size: 11px; color: #666; font-weight: bold; min-width: 42px; text-align: center; }
+        .mini-badge span { color: #000; font-size: 12px; }
+
         .match-card { background: #fff; border: 2px dashed #000; padding: 15px; border-radius: 16px; margin-bottom: 15px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         .match-badge { display: inline-block; background: #000; color: #fff; font-size: 9px; font-weight: bold; padding: 4px 8px; border-radius: 20px; letter-spacing: 0.5px; margin-bottom: 12px; }
         .match-split { display: flex; gap: 12px; }
@@ -574,5 +584,5 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-                  }
-                                                                                                                                                                                     
+                    }
+                     

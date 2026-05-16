@@ -143,7 +143,7 @@ export default function HomePage() {
     if (phoneNumberLength < 10) return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7)}`;
     return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7, 9)} ${phoneNumber.slice(9, 11)}`;
   };
-    const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
+      const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
   const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
 
   const addObject = async () => {
@@ -355,7 +355,7 @@ export default function HomePage() {
             </div>
           </>
         )}
-                        {activeTab === 'objects' && (
+            {activeTab === 'objects' && (
           <div className="form-container">
             <h2>Выставить объект</h2>
             <div className="form-stack">
@@ -632,4 +632,4 @@ export default function HomePage() {
         .match-side .m-agent { display: block; font-size: 10px; color: #999; }
         .match-divider { width: 1px; background: #eee; }
 
-        .crm                                                     
+        .crm

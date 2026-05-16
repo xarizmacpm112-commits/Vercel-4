@@ -7,12 +7,9 @@ import {
   Building2,
   Users,
   ClipboardList,
-  Search,
   User,
   Trophy,
-  Medal,
-  ChevronDown,
-  ChevronUp
+  Medal
 } from 'lucide-react'
 
 const supabase = createClient(
@@ -25,7 +22,6 @@ export default function HomePage() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [activeTab, setActiveTab] = useState('home')
   const [registryTab, setRegistryTab] = useState('objects')
-  const [showFilters, setShowFilters] = useState(false)
 
   const [agentName, setAgentName] = useState('')
   const [agentPhone, setAgentPhone] = useState('')
@@ -77,39 +73,30 @@ export default function HomePage() {
   }
 
   const fetchObjects = async () => {
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('objects')
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (!error && data) {
-      setObjects(data)
-    }
+    if (data) setObjects(data)
   }
 
   const fetchClients = async () => {
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('clients')
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (!error && data) {
-      setClients(data)
-    }
+    if (data) setClients(data)
   }
 
   const fetchAgents = async () => {
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('agents')
       .select('*')
       .order('name', { ascending: true })
 
-    if (!error && data) {
-      setAllAgents(data)
-    }
+    if (data) setAllAgents(data)
   }
 
   const handleLogin = async () => {
@@ -121,7 +108,7 @@ export default function HomePage() {
     const { data: existingAgent } = await supabase
       .from('agents')
       .select('*')
-      .eq('name', agentName.trim())
+      .eq('name', agentName)
       .maybeSingle()
 
     if (!existingAgent) {
@@ -130,13 +117,12 @@ export default function HomePage() {
         .from('agents')
         .insert([
           {
-            name: agentName.trim(),
+            name: agentName,
             phone: agentPhone
           }
         ])
 
       if (error) {
-        console.log(error)
         return alert('Ошибка регистрации')
       }
     }
@@ -154,20 +140,13 @@ export default function HomePage() {
       .from('objects')
       .insert([
         {
-          type: newObject.type,
-          price: Number(newObject.price),
-          rooms: newObject.rooms,
-          area: newObject.area,
-          floor: newObject.floor,
-          district: newObject.district,
-          address: newObject.address,
+          ...newObject,
           agent: agentName
         }
       ])
 
     if (error) {
-      console.log(error)
-      return alert('Ошибка добавления объекта')
+      return alert('Ошибка добавления')
     }
 
     await fetchObjects()
@@ -191,24 +170,13 @@ export default function HomePage() {
       .from('clients')
       .insert([
         {
-          propertytype: newClient.propertyType,
-          budgetfrom: Number(newClient.budgetFrom || 0),
-          budgetto: Number(newClient.budgetTo || 0),
-          roomsfrom: newClient.roomsFrom,
-          roomsto: newClient.roomsTo,
-          floorfrom: newClient.floorFrom,
-          floorto: newClient.floorTo,
-          areafrom: newClient.areaFrom,
-          areato: newClient.areaTo,
-          district: newClient.district,
-          address: newClient.address,
+          ...newClient,
           agent: agentName
         }
       ])
 
     if (error) {
-      console.log(error)
-      return alert('Ошибка добавления клиента')
+      return alert('Ошибка сохранения')
     }
 
     await fetchClients()
@@ -231,16 +199,12 @@ export default function HomePage() {
   }
 
   const formatNumber = (val) => {
-
     if (!val) return ''
-
     let number = val.toString().replace(/\s/g, '')
-
     return number.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
   }
 
   const formatPhoneNumber = (value) => {
-
     if (!value) return value
 
     const phoneNumber = value.replace(/[^\d]/g, '')
@@ -283,7 +247,6 @@ export default function HomePage() {
     return (
       <main className="login-page">
         <div className="login-card">
-
           <h1>B2B GARANT</h1>
 
           <input
@@ -301,7 +264,6 @@ export default function HomePage() {
           <button onClick={handleLogin}>
             ВОЙТИ
           </button>
-
         </div>
       </main>
     )
@@ -311,13 +273,11 @@ export default function HomePage() {
     <main className="crm-container">
 
       <header className="topbar">
-
         <h1>B2B GARANT</h1>
 
         <button className="profile-btn">
           <User size={20} />
         </button>
-
       </header>
 
       <section className="content" style={{ paddingBottom: '100px' }}>
@@ -327,7 +287,6 @@ export default function HomePage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
 
               <div>
-
                 <p className="group-label">МОИ ПОКАЗАТЕЛИ</p>
 
                 <div className="stats-grid-3">
@@ -351,7 +310,6 @@ export default function HomePage() {
               </div>
 
               <div>
-
                 <p className="group-label">КОМПАНИЯ</p>
 
                 <div className="stats-grid-3">
@@ -408,264 +366,26 @@ export default function HomePage() {
           </>
         )}
 
-        {activeTab === 'objects' && (
-          <div className="form-container">
-
-            <h2>Выставить объект</h2>
-
-            <div className="form-stack">
-
-              <select
-                className="form-input"
-                value={newObject.type}
-                onChange={e => setNewObject({ ...newObject, type: e.target.value })}
-              >
-                <option>Квартира</option>
-                <option>Дом</option>
-              </select>
-
-              <input
-                className="form-input"
-                placeholder="Цена (₽)"
-                value={formatNumber(newObject.price)}
-                onChange={e => setNewObject({
-                  ...newObject,
-                  price: e.target.value.replace(/\s/g, '')
-                })}
-              />
-
-              <input
-                className="form-input"
-                placeholder="Кв²"
-                value={newObject.area}
-                onChange={e => setNewObject({
-                  ...newObject,
-                  area: e.target.value
-                })}
-              />
-
-              <input
-                className="form-input"
-                placeholder="Комнаты"
-                value={newObject.rooms}
-                onChange={e => setNewObject({
-                  ...newObject,
-                  rooms: e.target.value
-                })}
-              />
-
-              <input
-                className="form-input"
-                placeholder="Этаж"
-                value={newObject.floor}
-                onChange={e => setNewObject({
-                  ...newObject,
-                  floor: e.target.value
-                })}
-              />
-
-              <select
-                className="form-input"
-                value={newObject.district}
-                onChange={e => setNewObject({
-                  ...newObject,
-                  district: e.target.value
-                })}
-              >
-                <option>Ленинский</option>
-                <option>Кировский</option>
-                <option>Московский</option>
-              </select>
-
-              <input
-                className="form-input"
-                placeholder="Адрес"
-                value={newObject.address}
-                onChange={e => setNewObject({
-                  ...newObject,
-                  address: e.target.value
-                })}
-              />
-
-              <button className="save-btn" onClick={addObject}>
-                ОПУБЛИКОВАТЬ
-              </button>
-
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'clients' && (
-          <div className="form-container">
-
-            <h2>Заявка покупателя</h2>
-
-            <div className="form-stack">
-
-              <select
-                className="form-input"
-                value={newClient.propertyType}
-                onChange={e => setNewClient({
-                  ...newClient,
-                  propertyType: e.target.value
-                })}
-              >
-                <option>Квартира</option>
-                <option>Дом</option>
-              </select>
-
-              <div className="dual-input">
-
-                <input
-                  className="form-input"
-                  placeholder="Цена от (₽)"
-                  value={formatNumber(newClient.budgetFrom)}
-                  onChange={e => setNewClient({
-                    ...newClient,
-                    budgetFrom: e.target.value.replace(/\s/g, '')
-                  })}
-                />
-
-                <input
-                  className="form-input"
-                  placeholder="Цена до (₽)"
-                  value={formatNumber(newClient.budgetTo)}
-                  onChange={e => setNewClient({
-                    ...newClient,
-                    budgetTo: e.target.value.replace(/\s/g, '')
-                  })}
-                />
-
-              </div>
-
-              <div className="dual-input">
-
-                <input
-                  className="form-input"
-                  placeholder="Кв² от"
-                  onChange={e => setNewClient({
-                    ...newClient,
-                    areaFrom: e.target.value
-                  })}
-                />
-
-                <input
-                  className="form-input"
-                  placeholder="Кв² до"
-                  onChange={e => setNewClient({
-                    ...newClient,
-                    areaTo: e.target.value
-                  })}
-                />
-
-              </div>
-
-              <div className="dual-input">
-
-                <input
-                  className="form-input"
-                  placeholder="Комнат от"
-                  onChange={e => setNewClient({
-                    ...newClient,
-                    roomsFrom: e.target.value
-                  })}
-                />
-
-                <input
-                  className="form-input"
-                  placeholder="Комнат до"
-                  onChange={e => setNewClient({
-                    ...newClient,
-                    roomsTo: e.target.value
-                  })}
-                />
-
-              </div>
-
-              <div className="dual-input">
-
-                <input
-                  className="form-input"
-                  placeholder="Этаж от"
-                  onChange={e => setNewClient({
-                    ...newClient,
-                    floorFrom: e.target.value
-                  })}
-                />
-
-                <input
-                  className="form-input"
-                  placeholder="Этаж до"
-                  onChange={e => setNewClient({
-                    ...newClient,
-                    floorTo: e.target.value
-                  })}
-                />
-
-              </div>
-
-              <select
-                className="form-input"
-                value={newClient.district}
-                onChange={e => setNewClient({
-                  ...newClient,
-                  district: e.target.value
-                })}
-              >
-                <option>Ленинский</option>
-                <option>Кировский</option>
-                <option>Московский</option>
-              </select>
-
-              <input
-                className="form-input"
-                placeholder="Адрес"
-                onChange={e => setNewClient({
-                  ...newClient,
-                  address: e.target.value
-                })}
-              />
-
-              <button className="save-btn" onClick={addClient}>
-                СОХРАНИТЬ ЗАЯВКУ
-              </button>
-
-            </div>
-          </div>
-        )}
-
       </section>
 
       <nav className="bottom-nav">
 
-        <button
-          className={activeTab === 'home' ? 'active' : ''}
-          onClick={() => setActiveTab('home')}
-        >
+        <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}>
           <Home size={22} />
           <span>Главная</span>
         </button>
 
-        <button
-          className={activeTab === 'objects' ? 'active' : ''}
-          onClick={() => setActiveTab('objects')}
-        >
+        <button className={activeTab === 'objects' ? 'active' : ''} onClick={() => setActiveTab('objects')}>
           <Building2 size={22} />
           <span>Объект</span>
         </button>
 
-        <button
-          className={activeTab === 'clients' ? 'active' : ''}
-          onClick={() => setActiveTab('clients')}
-        >
+        <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}>
           <Users size={22} />
           <span>Клиент</span>
         </button>
 
-        <button
-          className={activeTab === 'registry' ? 'active' : ''}
-          onClick={() => setActiveTab('registry')}
-        >
+        <button className={activeTab === 'registry' ? 'active' : ''} onClick={() => setActiveTab('registry')}>
           <ClipboardList size={22} />
           <span>Реестр</span>
         </button>
@@ -684,17 +404,19 @@ export default function HomePage() {
         .form-input { padding: 12px; border-radius: 8px; border: 1px solid #ddd; width: 100%; outline: none; background: #f9f9f9; }
         .dual-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; width: 100%; }
-        .registry-nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        @media (min-width: 400px) { .registry-nav-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
-        .reg-btn { padding: 12px 5px; border: 1px solid #000; border-radius: 8px; background: transparent; font-weight: bold; cursor: pointer; font-size: 12px; }
-        .reg-btn.active { background: #000; color: #fff; }
-        .registry-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; position: relative; }
-        .registry-card h3 { margin: 0 0 5px; font-size: 16px; }
-        .registry-card p { margin: 0; font-size: 13px; color: #666; }
-        .registry-card strong { display: block; margin-top: 5px; color: #000; }
-        .registry-card span { position: absolute; right: 15px; top: 15px; font-size: 11px; color: #aaa; }
         .crm-container { max-width: 500px; margin: 0 auto; background: #fcfcfc; min-height: 100vh; font-family: sans-serif; }
         .topbar { padding: 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         .content { padding: 20px; }
         .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; height: 70px; background: #fff; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; }
-        .bottom-nav button { background: none; border: none; col
+        .bottom-nav button { background: none; border: none; color: #ccc; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .bottom-nav button.active { color: #000; }
+        .bottom-nav span { font-size: 10px; font-weight: bold; }
+        .login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; padding: 20px; }
+        .login-card { background: #fff; padding: 40px 20px; border-radius: 20px; width: 100%; text-align: center; }
+        .login-card input { padding: 15px; width: 100%; border-radius: 10px; border: 1px solid #eee; margin-bottom: 15px; background: #f9f9f9; }
+        .login-card button { width: 100%; padding: 16px; background: #000; color: #fff; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; }
+      `}</style>
+
+    </main>
+  )
+      }

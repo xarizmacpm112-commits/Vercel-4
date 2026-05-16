@@ -35,6 +35,18 @@ export default function HomePage() {
   const [clients, setClients] = useState([])
   const [allAgents, setAllAgents] = useState([])
 
+  // Состояния для фильтров реестра
+  const [filterType, setFilterType] = useState('Все типы')
+  const [filterPriceFrom, setFilterPriceFrom] = useState('')
+  const [filterPriceTo, setFilterPriceTo] = useState('')
+  const [filterAreaFrom, setFilterAreaFrom] = useState('')
+  const [filterAreaTo, setFilterAreaTo] = useState('')
+  const [filterRoomsFrom, setFilterRoomsFrom] = useState('')
+  const [filterRoomsTo, setFilterRoomsTo] = useState('')
+  const [filterFloorFrom, setFilterFloorFrom] = useState('')
+  const [filterFloorTo, setFilterFloorTo] = useState('')
+  const [filterDistrict, setFilterDistrict] = useState('Все районы')
+
   useEffect(() => {
     if (loggedIn) {
       fetchAllData()
@@ -108,18 +120,13 @@ export default function HomePage() {
     return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7, 9)} ${phoneNumber.slice(9, 11)}`;
   };
 
-  // Состояния для фильтров реестра
-  const [filterPriceFrom, setFilterPriceFrom] = useState('')
-  const [filterPriceTo, setFilterPriceTo] = useState('')
-
-  // Формы добавления (оставляем camelCase для стейта React, но при отправке переводим в регистр SQL)
+  // Формы добавления
   const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
   const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
 
   const addObject = async () => {
     if(!newObject.price) return alert("Введите цену");
     
-    // Приводим цену к числу numeric, как в твоем SQL
     const objectToSend = {
       type: newObject.type,
       price: parseFloat(newObject.price),
@@ -143,7 +150,6 @@ export default function HomePage() {
   }
 
   const addClient = async () => {
-    // ВАЖНО: маппим имена полей из стейта React в имена колонок твоего SQL (все в нижнем регистре)
     const clientToSend = {
       propertytype: newClient.propertyType,
       budgetfrom: newClient.budgetFrom ? parseFloat(newClient.budgetFrom) : null,
@@ -169,6 +175,70 @@ export default function HomePage() {
       alert("Заявка покупателя сохранена")
     }
   }
+
+  // Расчет ТОП-3 лучших агентов на основе реальных данных из базы
+  const getTopAgents = () => {
+    const stats = allAgents.map(agent => {
+      const agentObjects = objects.filter(o => o.agent === agent.name).length
+      const agentClients = clients.filter(c => c.agent === agent.name).length
+      return {
+        name: agent.name,
+        objectsCount: agentObjects,
+        clientsCount: agentClients,
+        total: agentObjects + agentClients
+      }
+    })
+
+    // Сортируем по сумме объектов и клиентов (от большего к меньшему)
+    return stats.sort((a, b) => b.total - a.total).slice(0, 3)
+  }
+
+  // Массив цветов для рамок топ-3 агентов
+  const rankStyles = [
+    { color: '#FFD700', label: 'Золото' }, // 1 место
+    { color: '#C0C0C0', label: 'Серебро' }, // 2 место
+    { color: '#CD7F32', label: 'Бронза' }  // 3 место
+  ]
+
+  // Логика фильтрации объектов в реестре
+  const filteredObjects = objects.filter(obj => {
+    if (filterType !== 'Все типы' && obj.type !== filterType) return false
+    if (filterDistrict !== 'Все районы' && obj.district !== filterDistrict) return false
+    if (filterPriceFrom && parseFloat(obj.price) < parseFloat(filterPriceFrom)) return false
+    if (filterPriceTo && parseFloat(obj.price) > parseFloat(filterPriceTo)) return false
+    if (filterAreaFrom && parseFloat(obj.area) < parseFloat(filterAreaFrom)) return false
+    if (filterAreaTo && parseFloat(obj.area) > parseFloat(filterAreaTo)) return false
+    if (filterRoomsFrom && parseFloat(obj.rooms) < parseFloat(filterRoomsFrom)) return false
+    if (filterRoomsTo && parseFloat(obj.rooms) > parseFloat(filterRoomsTo)) return false
+    if (filterFloorFrom && parseFloat(obj.floor) < parseFloat(filterFloorFrom)) return false
+    if (filterFloorTo && parseFloat(obj.floor) > parseFloat(filterFloorTo)) return false
+    return true
+  })
+
+  // Логика фильтрации клиентов в реестре
+  const filteredClients = clients.filter(cl => {
+    const pType = cl.propertytype || cl.propertyType
+    const bFrom = cl.budgetfrom || cl.budgetFrom
+    const bTo = cl.budgetto || cl.budgetTo
+    const rFrom = cl.roomsfrom || cl.roomsFrom
+    const rTo = cl.roomsto || cl.roomsTo
+    const fFrom = cl.floorfrom || cl.floorFrom
+    const fTo = cl.floorto || cl.floorTo
+    const aFrom = cl.areafrom || cl.areaFrom
+    const aTo = cl.areato || cl.areaTo
+
+    if (filterType !== 'Все типы' && pType !== filterType) return false
+    if (filterDistrict !== 'Все районы' && cl.district !== filterDistrict) return false
+    if (filterPriceFrom && bFrom && parseFloat(bFrom) < parseFloat(filterPriceFrom)) return false
+    if (filterPriceTo && bTo && parseFloat(bTo) > parseFloat(filterPriceTo)) return false
+    if (filterAreaFrom && aFrom && parseFloat(aFrom) < parseFloat(filterAreaFrom)) return false
+    if (filterAreaTo && aTo && parseFloat(aTo) > parseFloat(filterAreaTo)) return false
+    if (filterRoomsFrom && rFrom && parseFloat(rFrom) < parseFloat(filterRoomsFrom)) return false
+    if (filterRoomsTo && rTo && parseFloat(rTo) > parseFloat(filterRoomsTo)) return false
+    if (filterFloorFrom && fFrom && parseFloat(fFrom) < parseFloat(filterFloorFrom)) return false
+    if (filterFloorTo && fTo && parseFloat(fTo) > parseFloat(filterFloorTo)) return false
+    return true
+  })
 
   if (!loggedIn) {
     return (
@@ -220,17 +290,26 @@ export default function HomePage() {
             </div>
 
             <div className="agents-section">
-              <div className="section-title"><Trophy size={18} /> Список агентов</div>
-              {allAgents.map((agent, index) => (
-                <div key={agent.name} className="agent-rank-card">
-                  <div style={{ width: '30px', fontWeight: 'bold', color: '#000' }}>{index + 1}</div>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: 0, fontSize: '16px' }}>{agent.name}</h3>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>{agent.phone}</p>
+              <div className="section-title"><Trophy size={18} /> Лучшие агенты</div>
+              {getTopAgents().map((agent, index) => {
+                const styleConfig = rankStyles[index] || { color: '#eee' }
+                return (
+                  <div 
+                    key={agent.name} 
+                    className="agent-rank-card" 
+                    style={{ borderColor: styleConfig.color, borderWidth: '2px', borderStyle: 'solid' }}
+                  >
+                    <div style={{ width: '30px', fontWeight: 'bold', color: styleConfig.color }}>{index + 1}</div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ margin: 0, fontSize: '16px' }}>{agent.name}</h3>
+                      <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
+                        {agent.clientsCount} клиентов • {agent.objectsCount} объектов
+                      </p>
+                    </div>
+                    <Medal size={20} color={styleConfig.color} />
                   </div>
-                  <Medal size={20} color="#000" />
-                </div>
-              ))}
+                )
+              })}
             </div>
           </>
         )}
@@ -288,90 +367,35 @@ export default function HomePage() {
         {activeTab === 'registry' && (
           <>
             <div className="registry-nav-grid">
-              <button className={registryTab === 'objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('objects')}>Объекты</button>
-              <button className={registryTab === 'clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('clients')}>Клиенты</button>
-              <button className={registryTab === 'agents' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('agents')}>Агенты</button>
-              <button className={registryTab === 'matches' ? 'reg-btn active' : 'reg-btn'} onClick={() => setRegistryTab('matches')}>Матчи</button>
+              <button className={registryTab === 'objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('objects'); setShowFilters(false); }}>Объекты</button>
+              <button className={registryTab === 'clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('clients'); setShowFilters(false); }}>Клиенты</button>
+              <button className={registryTab === 'agents' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('agents'); setShowFilters(false); }}>Агенты</button>
+              <button className={registryTab === 'matches' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('matches'); setShowFilters(false); }}>Матчи</button>
             </div>
 
-            <div className="list-section">
-              {registryTab === 'objects' && objects.map(obj => (
-                <div className="registry-card" key={obj.id}>
-                  <h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p>
-                  <p>{obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><span>{obj.agent}</span>
-                </div>
-              ))}
-              {registryTab === 'clients' && clients.map(cl => (
-                <div className="registry-card" key={cl.id}>
-                  <h3>Поиск: {cl.propertytype || cl.propertyType}</h3>
-                  <p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p>
-                  <p>{cl.roomsfrom || cl.roomsFrom}-{cl.roomsto || cl.roomsTo} комн • Этаж {cl.floorfrom || cl.floorFrom}-{cl.floorto || cl.floorTo}</p>
-                  <p>{cl.district}, {cl.address}</p><span>{cl.agent}</span>
-                </div>
-              ))}
-              {registryTab === 'agents' && allAgents.map(a => (
-                <div className="registry-card" key={a.id}>
-                  <h3>{a.name}</h3>
-                  <p>{a.phone}</p>
-                </div>
-              ))}
-              {registryTab === 'matches' && (
-                <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Активных матчей пока нет</div>
-              )}
-            </div>
-          </>
-        )}
-      </section>
+            {registryTab !== 'agents' && registryTab !== 'matches' && (
+              <div className="registry-filter-container">
+                <button className="filter-toggle-btn" onClick={() => setShowFilters(!showFilters)}>
+                   <Search size={16} /> Поиск {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </button>
 
-      <nav className="bottom-nav">
-        <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}><Home size={22} /><span>Главная</span></button>
-        <button className={activeTab === 'objects' ? 'active' : ''} onClick={() => setActiveTab('objects')}><Building2 size={22} /><span>Объект</span></button>
-        <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}><Users size={22} /><span>Клиент</span></button>
-        <button className={activeTab === 'registry' ? 'active' : ''} onClick={() => setActiveTab('registry')}><ClipboardList size={22} /><span>Реестр</span></button>
-      </nav>
-
-      <style jsx>{`
-        .group-label { font-size: 12px; font-weight: bold; color: #666; margin-bottom: 8px; text-transform: uppercase; }
-        .stats-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .stat-box-simple { border: 1px solid #eee; padding: 10px; border-radius: 12px; text-align: center; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .stat-box-simple h3 { margin: 0; font-size: 18px; }
-        .stat-box-simple span { font-size: 10px; color: #888; text-transform: uppercase; }
-        
-        .agent-rank-card { display: flex; align-items: center; background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #eee; }
-        
-        .form-container { background: #fff; padding: 20px; border-radius: 15px; border: 1px solid #eee; }
-        .form-stack { display: flex; flex-direction: column; gap: 10px; }
-        .form-input { padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 14px; width: 100%; outline: none; background: #f9f9f9; }
-        .dual-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .save-btn { background: #000; color: #fff; padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; border: none; width: 100%; }
-        
-        .registry-nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        @media (min-width: 400px) { .registry-nav-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
-        .reg-btn { padding: 12px 5px; border: 1px solid #000; border-radius: 8px; background: transparent; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 12px; }
-        .reg-btn.active { background: #000; color: #fff; }
-
-        .registry-card { background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 10px; position: relative; }
-        .registry-card h3 { margin: 0 0 5px; font-size: 16px; }
-        .registry-card p { margin: 0; font-size: 13px; color: #666; }
-        .registry-card strong { display: block; margin-top: 5px; color: #000; }
-        .registry-card span { position: absolute; right: 15px; top: 15px; font-size: 11px; color: #aaa; }
-
-        .crm-container { max-width: 500px; margin: 0 auto; background: #fcfcfc; min-height: 100vh; font-family: sans-serif; }
-        .topbar { padding: 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .topbar h1 { margin: 0; font-size: 20px; }
-        .profile-btn { background: none; border: none; cursor: pointer; }
-        .content { padding: 20px; }
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; height: 70px; background: #fff; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; z-index: 100; }
-        .bottom-nav button { background: none; border: none; color: #ccc; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
-        .bottom-nav button.active { color: #000; }
-        .bottom-nav span { font-size: 10px; font-weight: bold; }
-        
-        .login-page { display: flex; align-items: center; justify-content: center; height: 100vh; background: #f4f4f4; padding: 20px; }
-        .login-card { background: #fff; padding: 40px 20px; border-radius: 20px; width: 100%; text-align: center; }
-        .login-card h1 { margin-bottom: 30px; }
-        .login-card input { padding: 15px; width: 100%; border-radius: 10px; border: 1px solid #eee; margin-bottom: 15px; outline: none; background: #f9f9f9; }
-        .login-card button { width: 100%; padding: 16px; background: #000; color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-      `}</style>
-    </main>
-  )
-      }
+                {showFilters && (
+                  <div className="expanded-filter-panel">
+                    <div className="filter-fields">
+                      <select className="form-input" value={filterType} onChange={e => setFilterType(e.target.value)}>
+                        <option>Все типы</option><option>Квартира</option><option>Дом</option>
+                      </select>
+                      <div className="dual-input">
+                        <input className="form-input" placeholder="Цена от" value={formatNumber(filterPriceFrom)} onChange={e => setFilterPriceFrom(e.target.value.replace(/\s/g, ''))} />
+                        <input className="form-input" placeholder="Цена до" value={formatNumber(filterPriceTo)} onChange={e => setFilterPriceTo(e.target.value.replace(/\s/g, ''))} />
+                      </div>
+                      <div className="dual-input">
+                        <input className="form-input" placeholder="Кв² от" value={filterAreaFrom} onChange={e => setFilterAreaFrom(e.target.value)} />
+                        <input className="form-input" placeholder="Кв² до" value={filterAreaTo} onChange={e => setFilterAreaTo(e.target.value)} />
+                      </div>
+                      <div className="dual-input">
+                        <input className="form-input" placeholder="Комнаты от" value={filterRoomsFrom} onChange={e => setFilterRoomsFrom(e.target.value)} />
+                        <input className="form-input" placeholder="Комнаты до" value={filterRoomsTo} onChange={e => setFilterRoomsTo(e.target.value)} />
+                      </div>
+                      <div className="dual-input">
+                        <inpu

@@ -127,7 +127,7 @@ export default function HomePage() {
     if (phoneNumberLength < 10) return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7)}`;
     return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7, 9)} ${phoneNumber.slice(9, 11)}`;
   };
-    const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
+        const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
   const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
 
   const addObject = async () => {
@@ -223,8 +223,6 @@ export default function HomePage() {
     const bTo = cl.budgetto || cl.budgetTo
     const rFrom = cl.roomsfrom || cl.roomsFrom
     const rTo = cl.roomsto || cl.roomsTo
-    const fFrom = cl.floorfrom || cl.floorFrom
-    const fTo = cl.floorto || cl.floorTo
     const aFrom = cl.areafrom || cl.areaFrom
     const aTo = cl.areato || cl.areaTo
 
@@ -236,10 +234,37 @@ export default function HomePage() {
     if (filterAreaTo && aTo && parseFloat(aTo) > parseFloat(filterAreaTo)) return false
     if (filterRoomsFrom && rFrom && parseFloat(rFrom) < parseFloat(filterRoomsFrom)) return false
     if (filterRoomsTo && rTo && parseFloat(rTo) > parseFloat(filterRoomsTo)) return false
-    if (filterFloorFrom && fFrom && parseFloat(fFrom) < parseFloat(filterFloorFrom)) return false
-    if (filterFloorTo && fTo && parseFloat(fTo) > parseFloat(filterFloorTo)) return false
     return true
   })
+
+  const getMatches = () => {
+    const matchesList = []
+    
+    objects.forEach(obj => {
+      clients.forEach(cl => {
+        const pType = cl.propertytype || cl.propertyType
+        const bFrom = cl.budgetfrom || cl.budgetFrom ? parseFloat(cl.budgetfrom || cl.budgetFrom) : 0
+        const bTo = cl.budgetto || cl.budgetTo ? parseFloat(cl.budgetto || cl.budgetTo) : Infinity
+        const rFrom = cl.roomsfrom || cl.roomsFrom ? parseFloat(cl.roomsfrom || cl.roomsFrom) : 0
+        const rTo = cl.roomsto || cl.roomsTo ? parseFloat(cl.roomsto || cl.roomsTo) : Infinity
+        const aFrom = cl.areafrom || cl.areaFrom ? parseFloat(cl.areafrom || cl.areaFrom) : 0
+        const aTo = cl.areato || cl.areaTo ? parseFloat(cl.areato || cl.areaTo) : Infinity
+
+        const matchType = obj.type === pType
+        const matchDistrict = obj.district === cl.district
+        const matchRooms = parseFloat(obj.rooms) >= rFrom && parseFloat(obj.rooms) <= rTo
+        const matchPrice = parseFloat(obj.price) >= bFrom && parseFloat(obj.price) <= bTo
+        const matchArea = parseFloat(obj.area) >= aFrom && parseFloat(obj.area) <= aTo
+
+        if (matchType && matchDistrict && matchRooms && matchPrice && matchArea) {
+          if (obj.agent === agentName || cl.agent === agentName) {
+            matchesList.push({ id: `${obj.id}-${cl.id}`, object: obj, client: cl })
+          }
+        }
+      })
+    })
+    return matchesList
+  }
 
   if (!loggedIn) {
     return (
@@ -277,7 +302,7 @@ export default function HomePage() {
                 <div className="stats-grid-3">
                   <div className="stat-box-simple"><h3>{clients.filter(c => c.agent === agentName).length}</h3><span>Клиенты</span></div>
                   <div className="stat-box-simple"><h3>{objects.filter(o => o.agent === agentName).length}</h3><span>Объекты</span></div>
-                  <div className="stat-box-simple"><h3>0</h3><span>Матчи</span></div>
+                  <div className="stat-box-simple"><h3>{getMatches().length}</h3><span>Матчи</span></div>
                 </div>
               </div>
               <div>
@@ -314,7 +339,7 @@ export default function HomePage() {
             </div>
           </>
         )}
-                {activeTab === 'objects' && (
+            {activeTab === 'objects' && (
           <div className="form-container">
             <h2>Выставить объект</h2>
             <div className="form-stack">
@@ -437,10 +462,44 @@ export default function HomePage() {
                 <div className="registry-card" key={a.id}>
                   <h3>{a.name}</h3>
                   <p>{a.phone}</p>
+                  <div style={{ marginTop: '8px', fontSize: '12px', color: '#666', borderTop: '1px solid #f5f5f5', paddingTop: '6px' }}>
+                    Объектов: <strong>{objects.filter(o => o.agent === a.name).length}</strong> | Клиентов: <strong>{clients.filter(c => c.agent === a.name).length}</strong>
+                  </div>
                 </div>
               ))}
               {registryTab === 'matches' && (
-                <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Активных матчей пока нет</div>
+                getMatches().length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Активных матчей пока нет</div>
+                ) : (
+                  getMatches().map(m => (
+                    <div className="match-card" key={m.id}>
+                      <div className="match-badge">НАЙДЕНО СОВПАДЕНИЕ</div>
+                      <div className="match-split">
+                        <div className="match-side">
+                          <h4>ОБЪЕКТ</h4>
+                          <p className="m-type">{m.object.type}</p>
+                          <p className="m-info">{m.object.rooms} комн • {m.object.area} м²</p>
+                          <p className="m-dist">{m.object.district}</p>
+                          <p className="m-price">{formatNumber(m.object.price)} ₽</p>
+                          <span className="m-agent">Автор: {m.object.agent}</span>
+                        </div>
+                        <div className="match-divider"></div>
+                        <div className="match-side">
+                          <h4>КЛИЕНТ</h4>
+                          <p className="m-type">Поиск: {m.client.propertytype || m.client.propertyType}</p>
+                          <p className="m-info">
+                            {(m.client.roomsfrom || m.client.roomsFrom) || 0}-{(m.client.roomsto || m.client.roomsTo) || 0} комн • {(m.client.areafrom || m.client.areaFrom) || 0}-{(m.client.areato || m.client.areaTo) || 0} м²
+                          </p>
+                          <p className="m-dist">{m.client.district}</p>
+                          <p className="m-price">
+                            До {formatNumber(m.client.budgetto || m.client.budgetTo)} ₽
+                          </p>
+                          <span className="m-agent">Автор: {m.client.agent}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )
               )}
             </div>
           </>
@@ -485,6 +544,18 @@ export default function HomePage() {
         .registry-card strong { display: block; margin-top: 5px; color: #000; }
         .registry-card span { position: absolute; right: 15px; top: 15px; font-size: 11px; color: #aaa; }
 
+        .match-card { background: #fff; border: 2px dashed #000; padding: 15px; border-radius: 16px; margin-bottom: 15px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .match-badge { display: inline-block; background: #000; color: #fff; font-size: 9px; font-weight: bold; padding: 4px 8px; border-radius: 20px; letter-spacing: 0.5px; margin-bottom: 12px; }
+        .match-split { display: flex; gap: 12px; }
+        .match-side { flex: 1; }
+        .match-side h4 { margin: 0 0 6px 0; font-size: 11px; color: #888; letter-spacing: 0.5px; }
+        .match-side .m-type { margin: 0 0 4px 0; font-size: 14px; font-weight: bold; color: #000; }
+        .match-side .m-info { margin: 0 0 2px 0; font-size: 12px; color: #444; }
+        .match-side .m-dist { margin: 0 0 6px 0; font-size: 12px; color: #777; }
+        .match-side .m-price { margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #000; }
+        .match-side .m-agent { display: block; font-size: 10px; color: #999; }
+        .match-divider { width: 1px; background: #eee; }
+
         .crm-container { max-width: 500px; margin: 0 auto; background: #fcfcfc; min-height: 100vh; font-family: sans-serif; }
         .topbar { padding: 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         .topbar h1 { margin: 0; font-size: 20px; }
@@ -504,3 +575,4 @@ export default function HomePage() {
     </main>
   )
                   }
+                                                                                                                                                                                     

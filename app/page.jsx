@@ -143,8 +143,8 @@ export default function HomePage() {
     return `+${phoneNumber.slice(0, 1)} ${phoneNumber.slice(1, 4)} ${phoneNumber.slice(4, 7)} ${phoneNumber.slice(7, 9)} ${phoneNumber.slice(9, 11)}`;
   };
 
-  const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' })
-  const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' })
+  const [newObject, setNewObject] = useState({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Пропустить', address: '' })
+  const [newClient, setNewClient] = useState({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Пропустить', address: '' })
 
   const addObject = async () => {
     if(!newObject.price) return alert("Введите цену");
@@ -154,7 +154,7 @@ export default function HomePage() {
     }
     const { error } = await supabase.from('objects').insert([objectToSend])
     if (error) alert("Ошибка при сохранении объекта: " + error.message)
-    else { await fetchObjects(); setNewObject({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Ленинский', address: '' }); alert("Объект опубликован"); }
+    else { await fetchObjects(); setNewObject({ type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Пропустить', address: '' }); alert("Объект опубликован"); }
   }
 
   const addClient = async () => {
@@ -166,7 +166,7 @@ export default function HomePage() {
     }
     const { error } = await supabase.from('clients').insert([clientToSend])
     if (error) alert("Ошибка при сохранении заявки: " + error.message)
-    else { await fetchClients(); setNewClient({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Ленинский', address: '' }); alert("Заявка покупателя сохранена"); }
+    else { await fetchClients(); setNewClient({ propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Пропустить', address: '' }); alert("Заявка покупателя сохранена"); }
   }
 
   const getTopAgents = () => {
@@ -225,7 +225,9 @@ export default function HomePage() {
         const aFrom = cl.areafrom || cl.areaFrom ? parseFloat(cl.areafrom || cl.areaFrom) : 0
         const aTo = cl.areato || cl.areaTo ? parseFloat(cl.areato || cl.areaTo) : Infinity
         const matchType = obj.type === pType
-        const matchDistrict = obj.district === cl.district
+        
+        const matchDistrict = obj.district === 'Пропустить' || cl.district === 'Пропустить' || obj.district === cl.district
+        
         const matchRooms = parseFloat(obj.rooms) >= rFrom && parseFloat(obj.rooms) <= rTo
         const matchPrice = parseFloat(obj.price) >= bFrom && parseFloat(obj.price) <= bTo
         const matchArea = parseFloat(obj.area) >= aFrom && parseFloat(obj.area) <= aTo
@@ -248,8 +250,8 @@ export default function HomePage() {
         </div>
       </main>
     )
-      }
-        return (
+          }
+            return (
     <main className="crm-container">
       <header className="topbar">
         <div><h1>B2B GARANT</h1></div>
@@ -302,7 +304,18 @@ export default function HomePage() {
               <input className="form-input" placeholder="Кв²" value={newObject.area} onChange={e => setNewObject({...newObject, area: e.target.value})} />
               <input className="form-input" placeholder="Комнаты" value={newObject.rooms} onChange={e => setNewObject({...newObject, rooms: e.target.value})} />
               <input className="form-input" placeholder="Этаж" value={newObject.floor} onChange={e => setNewObject({...newObject, floor: e.target.value})} />
-              <select className="form-input" value={newObject.district} onChange={e => setNewObject({...newObject, district: e.target.value})}><option>Ленинский</option><option>Кировский</option><option>Московский</option></select>
+              
+              <select className="form-input" value={newObject.district} onChange={e => setNewObject({...newObject, district: e.target.value})}>
+                <option>Пропустить</option>
+                <option>Альбурикент</option>
+                <option>Кировский</option>
+                <option>Кяхулай</option>
+                <option>Ленинский</option>
+                <option>Новый Кяхулай</option>
+                <option>Советский</option>
+                <option>Тарки</option>
+              </select>
+              
               <input className="form-input" placeholder="Адрес" value={newObject.address} onChange={e => setNewObject({...newObject, address: e.target.value})} />
               <button className="save-btn" onClick={addObject}>ОПУБЛИКОВАТЬ</button>
             </div>
@@ -321,7 +334,18 @@ export default function HomePage() {
               <div className="dual-input"><input className="form-input" placeholder="Кв² от" value={newClient.areaFrom} onChange={e => setNewClient({...newClient, areaFrom: e.target.value})} /><input className="form-input" placeholder="Кв² до" value={newClient.areaTo} onChange={e => setNewClient({...newClient, areaTo: e.target.value})} /></div>
               <div className="dual-input"><input className="form-input" placeholder="Комнат от" value={newClient.roomsFrom} onChange={e => setNewClient({...newClient, roomsFrom: e.target.value})} /><input className="form-input" placeholder="Комнат до" value={newClient.roomsTo} onChange={e => setNewClient({...newClient, roomsTo: e.target.value})} /></div>
               <div className="dual-input"><input className="form-input" placeholder="Этаж от" value={newClient.floorFrom} onChange={e => setNewClient({...newClient, floorFrom: e.target.value})} /><input className="form-input" placeholder="Этаж до" value={newClient.floorTo} onChange={e => setNewClient({...newClient, floorTo: e.target.value})} /></div>
-              <select className="form-input" value={newClient.district} onChange={e => setNewClient({...newClient, district: e.target.value})}><option>Ленинский</option><option>Кировский</option><option>Московский</option></select>
+              
+              <select className="form-input" value={newClient.district} onChange={e => setNewClient({...newClient, district: e.target.value})}>
+                <option>Пропустить</option>
+                <option>Альбурикент</option>
+                <option>Кировский</option>
+                <option>Кяхулай</option>
+                <option>Ленинский</option>
+                <option>Новый Кяхулай</option>
+                <option>Советский</option>
+                <option>Тарки</option>
+              </select>
+              
               <input className="form-input" placeholder="Адрес" value={newClient.address} onChange={e => setNewClient({...newClient, address: e.target.value})} />
               <button className="save-btn" onClick={addClient}>СОХРАНИТЬ ЗАЯВКУ</button>
             </div>
@@ -378,7 +402,19 @@ export default function HomePage() {
                       <div className="dual-input"><input className="form-input" placeholder="Кв² от" value={filterAreaFrom} onChange={e => setFilterAreaFrom(e.target.value)} /><input className="form-input" placeholder="Кв² до" value={filterAreaTo} onChange={e => setFilterAreaTo(e.target.value)} /></div>
                       <div className="dual-input"><input className="form-input" placeholder="Комнаты от" value={filterRoomsFrom} onChange={e => setFilterRoomsFrom(e.target.value)} /><input className="form-input" placeholder="Комнаты до" value={filterRoomsTo} onChange={e => setFilterRoomsTo(e.target.value)} /></div>
                       <div className="dual-input"><input className="form-input" placeholder="Этаж от" value={filterFloorFrom} onChange={e => setFilterFloorFrom(e.target.value)} /><input className="form-input" placeholder="Этаж до" value={filterFloorTo} onChange={e => setFilterFloorTo(e.target.value)} /></div>
-                      <select className="form-input" value={filterDistrict} onChange={e => setFilterDistrict(e.target.value)}><option>Все районы</option><option>Ленинский</option><option>Кировский</option><option>Московский</option></select>
+                      
+                      <select className="form-input" value={filterDistrict} onChange={e => setFilterDistrict(e.target.value)}>
+                        <option>Все районы</option>
+                        <option>Пропустить</option>
+                        <option>Альбурикент</option>
+                        <option>Кировский</option>
+                        <option>Кяхулай</option>
+                        <option>Ленинский</option>
+                        <option>Новый Кяхулай</option>
+                        <option>Советский</option>
+                        <option>Тарки</option>
+                      </select>
+                      
                       <button className="save-btn" onClick={() => setShowFilters(false)}>ПРИМЕНИТЬ ФИЛЬТР</button>
                     </div>
                   </div>
@@ -396,7 +432,7 @@ export default function HomePage() {
           </>
         )}
       </section>
-                              <nav className="bottom-nav">
+            <nav className="bottom-nav">
         <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}><Home size={22} /><span>Главная</span></button>
         <button className={activeTab === 'objects' ? 'active' : ''} onClick={() => setActiveTab('objects')}><Building2 size={22} /><span>Объект</span></button>
         <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}><Users size={22} /><span>Клиент</span></button>

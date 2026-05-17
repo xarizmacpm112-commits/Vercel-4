@@ -49,7 +49,7 @@ export default function HomePage() {
   const [filterFloorTo, setFilterFloorTo] = useState('')
   const [filterDistrict, setFilterDistrict] = useState('Все районы')
 
-  // НОВОЕ: Конфигурация для красивого кастомного окна уведомлений
+  // НОВОЕ: Состояние для красивого кастомного уведомления
   const [alertConfig, setAlertConfig] = useState({
     isOpen: false,
     message: '',
@@ -57,7 +57,6 @@ export default function HomePage() {
     showCancel: false
   })
 
-  // Функция для вызова кастомного окна вместо системного alert/confirm
   const showAlert = (message, onConfirm = null, showCancel = false) => {
     setAlertConfig({ isOpen: true, message, onConfirm, showCancel })
   }
@@ -117,8 +116,8 @@ export default function HomePage() {
       if (error) showAlert("Ошибка при удалении: " + error.message)
       else fetchClients()
     }, true)
-  }
-    const handleLogin = async () => {
+                           }
+          const handleLogin = async () => {
     if (!agentName || !agentPhone) return showAlert("Заполните данные")
     try {
       const { data: existingAgent, error: fetchError } = await supabase
@@ -201,14 +200,9 @@ export default function HomePage() {
     }
     const { error } = await supabase.from('objects').insert([objectToSend])
     if (error) showAlert("Ошибка при сохранении объекта: " + error.message)
-    else { 
-      await fetchObjects(); 
-      setNewObject({ role: 'Продавец', type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Пропустить', address: '' }); 
-      showAlert("Объект опубликован"); 
-    }
-  }
-
-  const addClient = async () => {
+    else { await fetchObjects(); setNewObject({ role: 'Продавец', type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Пропустить', address: '' }); showAlert("Объект опубликован"); }
+      }
+    const addClient = async () => {
     const clientToSend = {
       role: newClient.role, propertytype: newClient.propertyType, budgetfrom: newClient.budgetFrom ? parseFloat(newClient.budgetFrom) : null,
       budgetto: newClient.budgetTo ? parseFloat(newClient.budgetTo) : null, roomsfrom: newClient.roomsFrom, roomsto: newClient.roomsTo,
@@ -217,13 +211,10 @@ export default function HomePage() {
     }
     const { error } = await supabase.from('clients').insert([clientToSend])
     if (error) showAlert("Ошибка при сохранении заявки: " + error.message)
-    else { 
-      await fetchClients(); 
-      setNewClient({ role: 'Покупатель', propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Пропустить', address: '' }); 
-      showAlert("Заявка покупателя сохранена"); 
-    }
+    else { await fetchClients(); setNewClient({ role: 'Покупатель', propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Пропустить', address: '' }); showAlert("Заявка покупателя сохранена"); }
   }
-    const getTopAgents = () => {
+
+  const getTopAgents = () => {
     const stats = allAgents.map(agent => {
       const agentObjects = objects.filter(o => o.agent === agent.name).length
       const agentClients = clients.filter(c => c.agent === agent.name).length
@@ -308,10 +299,10 @@ export default function HomePage() {
           <input placeholder="Имя агента" value={agentName} onChange={e => setAgentName(e.target.value)} />
           <input placeholder="+7 999 000 00 00" value={agentPhone} onChange={e => setAgentPhone(formatPhoneNumber(e.target.value))} />
           <button onClick={handleLogin}>ВОЙТИ</button>
-          <button onClick={handleRegister} className="register-btn-sec">ЗАРЕГИСТРИРОВАТЬСЯ</button>
+          <button onClick={handleRegister}>ЗАРЕГИСТРИРОВАТЬСЯ</button>
         </div>
 
-        {/* Красивое кастомное окно уведомлений вместо системного alert/confirm */}
+        {/* Кастомное окно уведомлений для экрана входа */}
         {alertConfig.isOpen && (
           <div className="custom-alert-overlay">
             <div className="custom-alert-box">
@@ -338,9 +329,9 @@ export default function HomePage() {
 
   return (
     <main className="crm-container">
-      {/* Ниже в твоём оригинальном коде идёт разметка вкладок CRM, которую ты смотришь с телефона */}
-      {/* В самом конце перед закрывающим </main> твоего основного кода добавь этот блок alertConfig, как выше */}
+      {/* Сюда встык встает твой код интерфейса CRM из телефона */}
       
+      {/* Кастомное окно уведомлений для внутренней части CRM */}
       {alertConfig.isOpen && (
         <div className="custom-alert-overlay">
           <div className="custom-alert-box">

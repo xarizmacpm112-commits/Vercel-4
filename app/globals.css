@@ -6,28 +6,29 @@
 
 body {
   font-family: Arial, sans-serif;
-  /* Фотография на задний план всего сайта */
+  /* Фотография на фоне — ЧЁТКАЯ И ОРИГИНАЛЬНАЯ (без размытий) */
   background-image: url('/1778008679710.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
   color: #111827;
+  overflow: hidden; /* Запрещает всему экрану браузера хаотично дёргаться */
 }
 
 .login-page {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
 }
 
+/* Карточка входа с чистым полупрозрачным фоном без размытия */
 .login-card {
   width: 100%;
   max-width: 420px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.9);
   padding: 30px;
   border-radius: 24px;
   display: flex;
@@ -56,28 +57,34 @@ body {
   font-weight: bold;
 }
 
-/* ИСПРАВЛЕНО: Сделали контейнер самого сайта внутри прозрачным */
+/* ИСПРАВЛЕНО: Контейнер сайта зафиксирован, больше никуда не улетает */
 .crm-container {
-  min-height: 100vh;
-  padding-bottom: 100px;
+  height: 100vh; /* Строго на всю высоту экрана телефона */
   max-width: 500px;
   margin: 0 auto;
-  background: rgba(244, 247, 251, 0.4) !important; /* Легкий оттенок, чтобы контент читался */
-  backdrop-filter: blur(8px); /* Красивое размытие фото за ним */
+  background: rgba(244, 247, 251, 0.45) !important; /* Легкий чистый оттенок поверх фото */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Сам контейнер не прокручивается */
 }
 
-/* Сделали верхнюю панель внутри сайта прозрачной */
+/* Верхняя панель */
 .topbar {
   padding: 24px;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(4px);
+  background: white;
+  flex-shrink: 0; /* Не сжимается */
 }
 
+/* ИСПРАВЛЕНО: Листается ТОЛЬКО контент внутри, меню и шапка стоят на месте */
 .content {
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex: 1;
+  overflow-y: auto; /* Плавный скролл только для карточек, когда их много */
+  padding-bottom: 100px; /* Защита, чтобы карточки не залезали под нижнее меню */
 }
 
 .stats-grid {
@@ -86,16 +93,15 @@ body {
   gap: 14px;
 }
 
+/* Обычный чистый белый цвет для карточек, чтобы текст идеально читался */
 .stat-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
+  background: white;
   padding: 20px;
   border-radius: 20px;
 }
 
 .best-agents {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
+  background: white;
   border-radius: 20px;
   padding: 20px;
 }
@@ -130,8 +136,7 @@ body {
 
 .search-box {
   height: 54px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
+  background: white;
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -143,14 +148,12 @@ body {
   border: none;
   outline: none;
   width: 100%;
-  background: transparent;
 }
 
 .object-card,
 .client-card,
 .registry-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
+  background: white;
   border-radius: 20px;
   padding: 20px;
   display: flex;
@@ -158,21 +161,19 @@ body {
   gap: 10px;
 }
 
-/* Сделали нижнее меню полупрозрачным */
+/* ИСПРАВЛЕНО: Панель навигации строго закреплена внизу мобильного контейнера */
 .bottom-nav {
-  position: fixed;
+  position: absolute; /* Привязана жестко к низу .crm-container */
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   width: 100%;
-  max-width: 500px;
   height: 82px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(4px);
+  background: white;
   display: flex;
   justify-content: space-around;
   align-items: center;
   border-top: 1px solid #eee;
+  z-index: 999; /* Всегда поверх контента */
 }
 
 .bottom-nav button {
@@ -197,6 +198,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  z-index: 1000;
 }
 
 .modal {

@@ -7,7 +7,7 @@
 body {
   font-family: Arial, sans-serif;
   /* Фотография на фоне — 100% ЧЁТКАЯ И ОРИГИНАЛЬНАЯ ВЕЗДЕ */
-  background-image: url('/1779017630460.jpg');
+  background-image: url('/1778008679710.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -47,12 +47,12 @@ body {
   padding: 0 16px;
 }
 
-/* ИСПРАВЛЕНО: Кнопка на экране входа теперь ЧЕРНАЯ и ТОНЬШЕ */
+/* Кнопка на экране входа — черная и аккуратная */
 .login-card button {
-  height: 46px;         /* Сделали тоньше (было 54px) */
+  height: 46px;
   border: none;
   border-radius: 14px;
-  background: #000000;  /* Сделали строго черной (было #2563eb) */
+  background: #000000;
   color: white;
   font-weight: bold;
   cursor: pointer;
@@ -225,3 +225,65 @@ body {
   color: white;
   font-weight: bold;
 }
+
+/* Красивое кастомное уведомление вместо серой системной рамки */
+.custom-alert-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 2000;
+}
+
+.custom-alert-box {
+  width: 100%;
+  max-width: 360px;
+  background: white;
+  padding: 24px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: center;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.custom-alert-box p {
+  font-size: 16px;
+  color: #111827;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.custom-alert-buttons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.custom-alert-btn-confirm {
+  flex: 1;
+  height: 46px;
+  border: none;
+  border-radius: 14px;
+  background: #000000;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.custom-alert-btn-cancel {
+  flex: 1;
+  height: 46px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #f9fafb;
+  color: #374151;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  }

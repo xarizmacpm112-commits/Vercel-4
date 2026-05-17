@@ -111,21 +111,39 @@ export default function HomePage() {
       if (fetchError) throw fetchError
       
       if (!existingAgent) {
-        const { error: insertError } = await supabase
-          .from('agents').insert([{ name: agentName, phone: agentPhone }])
-        if (insertError) throw insertError
-      } else {
-        setAgentPhone(existingAgent.phone)
-        localStorage.setItem('b2b_agent_phone', existingAgent.phone)
+        return alert("Аккаунт не зарегистрирован")
       }
       
+      setAgentPhone(existingAgent.phone)
       localStorage.setItem('b2b_agent_name', agentName)
-      if (!localStorage.getItem('b2b_agent_phone')) {
-        localStorage.setItem('b2b_agent_phone', agentPhone)
-      }
+      localStorage.setItem('b2b_agent_phone', existingAgent.phone)
       setLoggedIn(true)
     } catch (err) {
       alert("Ошибка при авторизации: " + err.message)
+    }
+  }
+
+  const handleRegister = async () => {
+    if (!agentName || !agentPhone) return alert("Заполните данные")
+    try {
+      const { data: existingAgent, error: fetchError } = await supabase
+        .from('agents').select('*').eq('name', agentName).maybeSingle()
+      if (fetchError) throw fetchError
+      
+      if (existingAgent) {
+        return alert("Аккаунт зарегистрирован")
+      }
+      
+      const { error: insertError } = await supabase
+        .from('agents').insert([{ name: agentName, phone: agentPhone }])
+      if (insertError) throw insertError
+      
+      localStorage.setItem('b2b_agent_name', agentName)
+      localStorage.setItem('b2b_agent_phone', agentPhone)
+      setLoggedIn(true)
+      alert("Регистрация успешна!")
+    } catch (err) {
+      alert("Ошибка при регистрации: " + err.message)
     }
   }
 
@@ -268,11 +286,12 @@ export default function HomePage() {
           <input placeholder="Имя агента" value={agentName} onChange={e => setAgentName(e.target.value)} />
           <input placeholder="+7 999 000 00 00" value={agentPhone} onChange={e => setAgentPhone(formatPhoneNumber(e.target.value))} />
           <button onClick={handleLogin}>ВОЙТИ</button>
+          <button onClick={handleRegister} className="register-btn-sec">ЗАРЕГИСТРИРОВАТЬСЯ</button>
         </div>
       </main>
     )
-  }
-      return (
+    }
+          return (
     <main className="crm-container">
       <header className="topbar">
         <div><h1>B2B GARANT</h1></div>
@@ -432,7 +451,7 @@ export default function HomePage() {
               </div>
             )}
             <div className="list-section">
-              {registryTab === 'objects' && filteredObjects.map(obj => (<div className="registry-card" key={obj.id}><span className="type-badge">{obj.role || 'Продавец'}</span>---<h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p><p>{obj.district === 'Пропустить' ? 'Все районы' : obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><span className="agent-tag-bottom">{obj.agent}</span></div>))}
+              {registryTab === 'objects' && filteredObjects.map(obj => (<div className="registry-card" key={obj.id}><span className="type-badge">{obj.role || 'Продавец'}</span><h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p><p>{obj.district === 'Пропустить' ? 'Все районы' : obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><span className="agent-tag-bottom">{obj.agent}</span></div>))}
               {registryTab === 'clients' && filteredClients.map(cl => (<div className="registry-card" key={cl.id}><span className="type-badge">{cl.role || 'Покупатель'}</span><h3>Поиск: {cl.propertytype || cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p><p>{(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн • Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0}</p><p>{cl.district === 'Пропустить' ? 'Все районы' : cl.district}, {cl.address}</p><span className="agent-tag-bottom">{cl.agent}</span></div>))}
               {registryTab === 'agents' && allAgents.map(a => (<div className="agent-row-card" key={a.id}><div className="agent-info-side"><h3>{a.name}</h3><p>{a.phone}</p></div><div className="agent-stats-side"><div className="mini-badge">О: <span>{objects.filter(o => o.agent === a.name).length}</span></div><div className="mini-badge">К: <span>{clients.filter(c => c.agent === a.name).length}</span></div></div></div>))}
               {registryTab === 'matches' && (getMatches().length === 0 ? (<div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Активных матчей пока нет</div>) : (getMatches().map(m => (
@@ -442,7 +461,7 @@ export default function HomePage() {
           </>
         )}
       </section>
-                  <nav className="bottom-nav">
+              <nav className="bottom-nav">
         <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}><Home size={22} /><span>Главная</span></button>
         <button className={activeTab === 'objects' ? 'active' : ''} onClick={() => setActiveTab('objects')}><Building2 size={22} /><span>Объект</span></button>
         <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}><Users size={22} /><span>Клиент</span></button>
@@ -520,6 +539,7 @@ export default function HomePage() {
         .login-card h1 { margin-bottom: 30px; }
         .login-card input { padding: 15px; width: 100%; border-radius: 10px; border: 1px solid #eee; margin-bottom: 15px; outline: none; background: #f9f9f9; }
         .login-card button { width: 100%; padding: 16px; background: #000; color: #fff; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .register-btn-sec { background: transparent !important; color: #000 !important; border: 1px solid #000 !important; margin-top: 10px; }
       `}</style>
     </main>
   )

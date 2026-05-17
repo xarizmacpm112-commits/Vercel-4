@@ -49,6 +49,19 @@ export default function HomePage() {
   const [filterFloorTo, setFilterFloorTo] = useState('')
   const [filterDistrict, setFilterDistrict] = useState('Все районы')
 
+  // НОВОЕ: Состояние для красивого кастомного уведомления
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    message: '',
+    onConfirm: null,
+    showCancel: false
+  })
+
+  // Вспомогательная функция для вызова красивого окна
+  const showAlert = (message, onConfirm = null, showCancel = false) => {
+    setAlertConfig({ isOpen: true, message, onConfirm, showCancel })
+  }
+
   useEffect(() => {
     const savedAgent = localStorage.getItem('b2b_agent_name')
     const savedPhone = localStorage.getItem('b2b_agent_phone')
@@ -91,27 +104,29 @@ export default function HomePage() {
   }
 
   const deleteObject = async (id) => {
-    if (!confirm("Вы уверены, что хотите удалить этот объект?")) return
-    const { error } = await supabase.from('objects').delete().eq('id', id)
-    if (error) alert("Ошибка при удалении: " + error.message)
-    else fetchObjects()
+    showAlert("Вы уверены, что хотите удалить этот объект?", async () => {
+      const { error } = await supabase.from('objects').delete().eq('id', id)
+      if (error) showAlert("Ошибка при удалении: " + error.message)
+      else fetchObjects()
+    }, true)
   }
 
   const deleteClient = async (id) => {
-    if (!confirm("Вы уверены, что хотите удалить эту заявку?")) return
-    const { error } = await supabase.from('clients').delete().eq('id', id)
-    if (error) alert("Ошибка при удалении: " + error.message)
-    else fetchClients()
+    showAlert("Вы уверены, что хотите удалить эту заявку?", async () => {
+      const { error } = await supabase.from('clients').delete().eq('id', id)
+      if (error) showAlert("Ошибка при удалении: " + error.message)
+      else fetchClients()
+    }, true)
   }
     const handleLogin = async () => {
-    if (!agentName || !agentPhone) return alert("Заполните данные")
+    if (!agentName || !agentPhone) return showAlert("Заполните данные")
     try {
       const { data: existingAgent, error: fetchError } = await supabase
         .from('agents').select('*').eq('name', agentName).maybeSingle()
       if (fetchError) throw fetchError
       
       if (!existingAgent) {
-        return alert("Аккаунт не зарегистрирован")
+        return showAlert("Аккаунт не зарегистрирован")
       }
       
       setAgentPhone(existingAgent.phone)
@@ -119,19 +134,19 @@ export default function HomePage() {
       localStorage.setItem('b2b_agent_phone', existingAgent.phone)
       setLoggedIn(true)
     } catch (err) {
-      alert("Ошибка при авторизации: " + err.message)
+      showAlert("Ошибка при авторизации: " + err.message)
     }
   }
 
   const handleRegister = async () => {
-    if (!agentName || !agentPhone) return alert("Заполните данные")
+    if (!agentName || !agentPhone) return showAlert("Заполните данные")
     try {
       const { data: existingAgent, error: fetchError } = await supabase
         .from('agents').select('*').eq('name', agentName).maybeSingle()
       if (fetchError) throw fetchError
       
       if (existingAgent) {
-        return alert("Аккаунт зарегистрирован")
+        return showAlert("Аккаунт зарегистрирован")
       }
       
       const { error: insertError } = await supabase
@@ -141,20 +156,21 @@ export default function HomePage() {
       localStorage.setItem('b2b_agent_name', agentName)
       localStorage.setItem('b2b_agent_phone', agentPhone)
       setLoggedIn(true)
-      alert("Регистрация успешна!")
+      showAlert("Регистрация успешна!")
     } catch (err) {
-      alert("Ошибка при регистрации: " + err.message)
+      showAlert("Ошибка при регистрации: " + err.message)
     }
   }
 
   const handleLogout = () => {
-    if (!confirm("Вы уверены, что хотите выйти из профиля?")) return
-    localStorage.removeItem('b2b_agent_name')
-    localStorage.removeItem('b2b_agent_phone')
-    setAgentName('')
-    setAgentPhone('')
-    setLoggedIn(false)
-    setActiveTab('home')
+    showAlert("Вы уверены, что хотите выйти из профиля?", () => {
+      localStorage.removeItem('b2b_agent_name')
+      localStorage.removeItem('b2b_agent_phone')
+      setAgentName('')
+      setAgentPhone('')
+      setLoggedIn(false)
+      setActiveTab('home')
+    }, true)
   }
 
   const formatNumber = (val) => {
@@ -178,14 +194,14 @@ export default function HomePage() {
   const [newClient, setNewClient] = useState({ role: 'Покупатель', propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Пропустить', address: '' })
 
   const addObject = async () => {
-    if(!newObject.price) return alert("Введите цену");
+    if(!newObject.price) return showAlert("Введите цену");
     const objectToSend = {
       role: newObject.role, type: newObject.type, price: parseFloat(newObject.price), rooms: newObject.rooms, area: newObject.area,
       floor: newObject.floor, district: newObject.district, address: newObject.address, agent: agentName
     }
     const { error } = await supabase.from('objects').insert([objectToSend])
-    if (error) alert("Ошибка при сохранении объекта: " + error.message)
-    else { await fetchObjects(); setNewObject({ role: 'Продавец', type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Пропустить', address: '' }); alert("Объект опубликован"); }
+    if (error) showAlert("Ошибка при сохранении объекта: " + error.message)
+    else { await fetchObjects(); setNewObject({ role: 'Продавец', type: 'Квартира', price: '', rooms: '', area: '', floor: '', district: 'Пропустить', address: '' }); showAlert("Объект опубликован"); }
   }
 
   const addClient = async () => {
@@ -196,8 +212,8 @@ export default function HomePage() {
       district: newClient.district, address: newClient.address, agent: agentName
     }
     const { error } = await supabase.from('clients').insert([clientToSend])
-    if (error) alert("Ошибка при сохранении заявки: " + error.message)
-    else { await fetchClients(); setNewClient({ role: 'Покупатель', propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Пропустить', address: '' }); alert("Заявка покупателя сохранена"); }
+    if (error) showAlert("Ошибка при сохранении заявки: " + error.message)
+    else { await fetchClients(); setNewClient({ role: 'Покупатель', propertyType: 'Квартира', budgetFrom: '', budgetTo: '', roomsFrom: '', roomsTo: '', floorFrom: '', floorTo: '', areaFrom: '', areaTo: '', district: 'Пропустить', address: '' }); showAlert("Заявка покупателя сохранена"); }
   }
 
   const getTopAgents = () => {
@@ -288,10 +304,7 @@ export default function HomePage() {
           <button onClick={handleLogin}>ВОЙТИ</button>
           <button onClick={handleRegister} className="register-btn-sec">ЗАРЕГИСТРИРОВАТЬСЯ</button>
         </div>
-      </main>
-    )
-    }
-          return (
+        return (
     <main className="crm-container">
       <header className="topbar">
         <div><h1>B2B GARANT</h1></div>
@@ -461,7 +474,7 @@ export default function HomePage() {
           </>
         )}
       </section>
-              <nav className="bottom-nav">
+                      <nav className="bottom-nav">
         <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}><Home size={22} /><span>Главная</span></button>
         <button className={activeTab === 'objects' ? 'active' : ''} onClick={() => setActiveTab('objects')}><Building2 size={22} /><span>Объект</span></button>
         <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}><Users size={22} /><span>Клиент</span></button>
@@ -543,4 +556,5 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-}
+        }
+        

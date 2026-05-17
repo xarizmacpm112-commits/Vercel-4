@@ -6,14 +6,14 @@
 
 body {
   font-family: Arial, sans-serif;
-  /* Фотография на фоне — ЧЁТКАЯ И ОРИГИНАЛЬНАЯ (без размытий) */
+  /* Фотография на фоне — 100% ЧЁТКАЯ И ОРИГИНАЛЬНАЯ ВЕЗДЕ */
   background-image: url('/1778008679710.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
   color: #111827;
-  overflow: hidden; /* Запрещает всему экрану браузера хаотично дёргаться */
+  overflow: hidden;
 }
 
 .login-page {
@@ -24,11 +24,10 @@ body {
   padding: 20px;
 }
 
-/* Карточка входа с чистым полупрозрачным фоном без размытия */
 .login-card {
   width: 100%;
   max-width: 420px;
-  background: rgba(255, 255, 255, 0.9);
+  background: white; /* Чистый белый цвет без прозрачности */
   padding: 30px;
   border-radius: 24px;
   display: flex;
@@ -57,34 +56,32 @@ body {
   font-weight: bold;
 }
 
-/* ИСПРАВЛЕНО: Контейнер сайта зафиксирован, больше никуда не улетает */
+/* ИСПРАВЛЕНО: Полностью убрали белый полупрозрачный слой сайта. Фон теперь 100% оригинальный */
 .crm-container {
-  height: 100vh; /* Строго на всю высоту экрана телефона */
+  height: 100vh;
   max-width: 500px;
   margin: 0 auto;
-  background: rgba(244, 247, 251, 0.45) !important; /* Легкий чистый оттенок поверх фото */
+  background: transparent !important; /* Контейнер стал полностью прозрачным */
   position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Сам контейнер не прокручивается */
+  overflow: hidden;
 }
 
-/* Верхняя панель */
 .topbar {
   padding: 24px;
   background: white;
-  flex-shrink: 0; /* Не сжимается */
+  flex-shrink: 0;
 }
 
-/* ИСПРАВЛЕНО: Листается ТОЛЬКО контент внутри, меню и шапка стоят на месте */
 .content {
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
   flex: 1;
-  overflow-y: auto; /* Плавный скролл только для карточек, когда их много */
-  padding-bottom: 100px; /* Защита, чтобы карточки не залезали под нижнее меню */
+  overflow-y: auto;
+  padding-bottom: 100px;
 }
 
 .stats-grid {
@@ -93,7 +90,6 @@ body {
   gap: 14px;
 }
 
-/* Обычный чистый белый цвет для карточек, чтобы текст идеально читался */
 .stat-card {
   background: white;
   padding: 20px;
@@ -161,9 +157,8 @@ body {
   gap: 10px;
 }
 
-/* ИСПРАВЛЕНО: Панель навигации строго закреплена внизу мобильного контейнера */
 .bottom-nav {
-  position: absolute; /* Привязана жестко к низу .crm-container */
+  position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -173,7 +168,7 @@ body {
   justify-content: space-around;
   align-items: center;
   border-top: 1px solid #eee;
-  z-index: 999; /* Всегда поверх контента */
+  z-index: 999;
 }
 
 .bottom-nav button {

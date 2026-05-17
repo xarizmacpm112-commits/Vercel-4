@@ -13,7 +13,8 @@ import {
   Medal,
   ChevronDown,
   ChevronUp,
-  Trash2
+  Trash2,
+  LogOut
 } from 'lucide-react'
 
 const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -37,7 +38,7 @@ export default function HomePage() {
 
   // Состояния фильтров
   const [filterType, setFilterType] = useState('Все типы')
-  const [filterRole, setFilterRole] = useState('Все категории') // Продавец/Арендодатель/Покупатель/Арендатор
+  const [filterRole, setFilterRole] = useState('Все категории')
   const [filterPriceFrom, setFilterPriceFrom] = useState('')
   const [filterPriceTo, setFilterPriceTo] = useState('')
   const [filterAreaFrom, setFilterAreaFrom] = useState('')
@@ -54,9 +55,13 @@ export default function HomePage() {
     if (savedAgent && savedPhone) {
       setAgentName(savedAgent)
       setAgentPhone(savedPhone)
-      setLoggedIn(true)
+      loggedInWithExisting(savedAgent, savedPhone)
     }
   }, [])
+
+  const loggedInWithExisting = async (name, phone) => {
+    setLoggedIn(true)
+  }
 
   useEffect(() => {
     if (loggedIn) {
@@ -104,17 +109,34 @@ export default function HomePage() {
       const { data: existingAgent, error: fetchError } = await supabase
         .from('agents').select('*').eq('name', agentName).maybeSingle()
       if (fetchError) throw fetchError
+      
       if (!existingAgent) {
         const { error: insertError } = await supabase
           .from('agents').insert([{ name: agentName, phone: agentPhone }])
         if (insertError) throw insertError
+      } else {
+        setAgentPhone(existingAgent.phone)
+        localStorage.setItem('b2b_agent_phone', existingAgent.phone)
       }
+      
       localStorage.setItem('b2b_agent_name', agentName)
-      localStorage.setItem('b2b_agent_phone', agentPhone)
+      if (!localStorage.getItem('b2b_agent_phone')) {
+        localStorage.setItem('b2b_agent_phone', agentPhone)
+      }
       setLoggedIn(true)
     } catch (err) {
       alert("Ошибка при авторизации: " + err.message)
     }
+  }
+
+  const handleLogout = () => {
+    if (!confirm("Вы уверены, что хотите выйти из профиля?")) return
+    localStorage.removeItem('b2b_agent_name')
+    localStorage.removeItem('b2b_agent_phone')
+    setAgentName('')
+    setAgentPhone('')
+    setLoggedIn(false)
+    setActiveTab('home')
   }
 
   const formatNumber = (val) => {
@@ -221,7 +243,6 @@ export default function HomePage() {
         const aTo = cl.areato || cl.areaTo ? parseFloat(cl.areato || cl.areaTo) : Infinity
         const cRole = cl.role || 'Покупатель'
         
-        // Условие матчинга категорий сделок: Продавец + Покупатель ИЛИ Арендодатель + Арендатор
         const matchRole = (obj.role === 'Продавец' && cRole === 'Покупатель') || (obj.role === 'Арендодатель' && cRole === 'Арендатор')
         const matchType = obj.type === pType
         const matchDistrict = obj.district === 'Пропустить' || cl.district === 'Пропустить' || obj.district === cl.district
@@ -250,8 +271,8 @@ export default function HomePage() {
         </div>
       </main>
     )
-      }
-                                                                   return (
+  }
+      return (
     <main className="crm-container">
       <header className="topbar">
         <div><h1>B2B GARANT</h1></div>
@@ -263,7 +284,7 @@ export default function HomePage() {
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
               <div>
-                <p className="group-label">МОИ ПОКАЗАТЕЯИ</p>
+                <p className="group-label">АГЕНТ</p>
                 <div className="stats-grid-3">
                   <div className="stat-box-simple"><h3>{clients.filter(c => c.agent === agentName).length}</h3><span>Клиенты</span></div>
                   <div className="stat-box-simple"><h3>{objects.filter(o => o.agent === agentName).length}</h3><span>Объекты</span></div>
@@ -297,7 +318,7 @@ export default function HomePage() {
 
         {activeTab === 'objects' && (
           <div className="form-container">
-            <h2>Выставить объект</h2>
+            <h2>Новый объект</h2>
             <div className="form-stack">
               <select className="form-input" value={newObject.role} onChange={e => setNewObject({...newObject, role: e.target.value})}><option>Продавец</option><option>Арендодатель</option></select>
               <select className="form-input" value={newObject.type} onChange={e => setNewObject({...newObject, type: e.target.value})}><option>Квартира</option><option>Дом</option><option>Коммерция</option></select>
@@ -305,16 +326,16 @@ export default function HomePage() {
               <input className="form-input" placeholder="Кв²" value={newObject.area} onChange={e => setNewObject({...newObject, area: e.target.value})} />
               <input className="form-input" placeholder="Комнаты" value={newObject.rooms} onChange={e => setNewObject({...newObject, rooms: e.target.value})} />
               <input className="form-input" placeholder="Этаж" value={newObject.floor} onChange={e => setNewObject({...newObject, floor: e.target.value})} />
-              <select className="form-input" value={newObject.district} onChange={e => setNewObject({...newObject, district: e.target.value})}><option>Пропустить</option><option>Альбурикент</option><option>Кировский</option><option>Кяхулай</option><option>Ленинский</option><option>Новый Кяхулай</option><option>Советский</option><option>Тарки</option></select>
+              <select className="form-input" value={newObject.district} onChange={e => setNewObject({...newObject, district: e.target.value})}><option value="Пропустить">Все районы</option><option>Альбурикент</option><option>Кировский</option><option>Кяхулай</option><option>Ленинский</option><option>Новый Кяхулай</option><option>Советский</option><option>Тарки</option></select>
               <input className="form-input" placeholder="Адрес" value={newObject.address} onChange={e => setNewObject({...newObject, address: e.target.value})} />
-              <button className="save-btn" onClick={addObject}>ОПУБЛИКОВАТЬ</button>
+              <button className="save-btn" onClick={addObject}>ДОБАВИТЬ В РЕЕСТР</button>
             </div>
           </div>
         )}
 
         {activeTab === 'clients' && (
           <div className="form-container">
-            <h2>Заявка покупателя</h2>
+            <h2>Новый клиент</h2>
             <div className="form-stack">
               <select className="form-input" value={newClient.role} onChange={e => setNewClient({...newClient, role: e.target.value})}><option>Покупатель</option><option>Арендатор</option></select>
               <select className="form-input" value={newClient.propertyType} onChange={e => setNewClient({...newClient, propertyType: e.target.value})}><option>Квартира</option><option>Дом</option><option>Коммерция</option></select>
@@ -325,16 +346,17 @@ export default function HomePage() {
               <div className="dual-input"><input className="form-input" placeholder="Кв² от" value={newClient.areaFrom} onChange={e => setNewClient({...newClient, areaFrom: e.target.value})} /><input className="form-input" placeholder="Кв² до" value={newClient.areaTo} onChange={e => setNewClient({...newClient, areaTo: e.target.value})} /></div>
               <div className="dual-input"><input className="form-input" placeholder="Комнат от" value={newClient.roomsFrom} onChange={e => setNewClient({...newClient, roomsFrom: e.target.value})} /><input className="form-input" placeholder="Комнат до" value={newClient.roomsTo} onChange={e => setNewClient({...newClient, roomsTo: e.target.value})} /></div>
               <div className="dual-input"><input className="form-input" placeholder="Этаж от" value={newClient.floorFrom} onChange={e => setNewClient({...newClient, floorFrom: e.target.value})} /><input className="form-input" placeholder="Этаж до" value={newClient.floorTo} onChange={e => setNewClient({...newClient, floorTo: e.target.value})} /></div>
-              <select className="form-input" value={newClient.district} onChange={e => setNewClient({...newClient, district: e.target.value})}><option>Пропустить</option><option>Альбурикент</option><option>Кировский</option><option>Кяхулай</option><option>Ленинский</option><option>Новый Кяхулай</option><option>Советский</option><option>Тарки</option></select>
+              <select className="form-input" value={newClient.district} onChange={e => setNewClient({...newClient, district: e.target.value})}><option value="Пропустить">Все районы</option><option>Альбурикент</option><option>Кировский</option><option>Кяхулай</option><option>Ленинский</option><option>Новый Кяхулай</option><option>Советский</option><option>Тарки</option></select>
               <input className="form-input" placeholder="Адрес" value={newClient.address} onChange={e => setNewClient({...newClient, address: e.target.value})} />
-              <button className="save-btn" onClick={addClient}>СОХРАНИТЬ ЗАЯВКУ</button>
+              <button className="save-btn" onClick={addClient}>ДОБАВИТЬ В РЕЕСТР</button>
             </div>
           </div>
         )}
 
         {activeTab === 'profile' && (
-          <div className="form-container">
-            <div style={{ marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}><h2 style={{ margin: '0 0 5px 0' }}>{agentName}</h2><p style={{ margin: 0, color: '#666', fontSize: '14px' }}>{agentPhone}</p></div>
+          <div className="form-container" style={{ position: 'relative' }}>
+            <button onClick={handleLogout} className="logout-btn-top" title="Выйти из профиля"><LogOut size={18} /></button>
+            <div style={{ marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px', paddingRight: '40px' }}><h2 style={{ margin: '0 0 5px 0' }}>{agentName}</h2><p style={{ margin: 0, color: '#666', fontSize: '14px' }}>{agentPhone}</p></div>
             <div className="registry-nav-grid" style={{ marginBottom: '20px' }}>
               <button className={profileTab === 'my-objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setProfileTab('my-objects'); setFilterRole('Все категории'); }}>Мои Объекты</button>
               <button className={profileTab === 'my-clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setProfileTab('my-clients'); setFilterRole('Все категории'); }}>Мои Клиенты</button>
@@ -357,7 +379,7 @@ export default function HomePage() {
                   <p style={{ textAlign: 'center', color: '#888', padding: '20px' }}>Нет объектов по выбранным фильтрам</p>
                 ) : (
                   objects.filter(o => o.agent === agentName && (filterRole === 'Все категории' || o.role === filterRole)).map(obj => (
-                    <div className="registry-card" key={obj.id}><span className="type-badge">{obj.role || 'Продавец'}</span><h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p><p>{obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><button className="delete-card-btn" onClick={() => deleteObject(obj.id)}><Trash2 size={16} /></button></div>
+                    <div className="registry-card" key={obj.id}><span className="type-badge">{obj.role || 'Продавец'}</span><h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p><p>{obj.district === 'Пропустить' ? 'Все районы' : obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><button className="delete-card-btn" onClick={() => deleteObject(obj.id)}><Trash2 size={16} /></button></div>
                   ))
                 )
               )}
@@ -366,7 +388,7 @@ export default function HomePage() {
                   <p style={{ textAlign: 'center', color: '#888', padding: '20px' }}>Нет заявок по выбранным фильтрам</p>
                 ) : (
                   clients.filter(c => c.agent === agentName && (filterRole === 'Все категории' || (c.role || 'Покупатель') === filterRole)).map(cl => (
-                    <div className="registry-card" key={cl.id}><span className="type-badge">{cl.role || 'Покупатель'}</span><h3>Поиск: {cl.propertytype || cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p><p>{(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн • Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0}</p><p>{cl.district}, {cl.address}</p><button className="delete-card-btn" onClick={() => deleteClient(cl.id)}><Trash2 size={16} /></button></div>
+                    <div className="registry-card" key={cl.id}><span className="type-badge">{cl.role || 'Покупатель'}</span><h3>Поиск: {cl.propertytype || cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p><p>{(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн • Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0}</p><p>{cl.district === 'Пропустить' ? 'Все районы' : cl.district}, {cl.address}</p><button className="delete-card-btn" onClick={() => deleteClient(cl.id)}><Trash2 size={16} /></button></div>
                   ))
                 )
               )}
@@ -402,7 +424,7 @@ export default function HomePage() {
                       <div className="dual-input"><input className="form-input" placeholder="Кв² от" value={filterAreaFrom} onChange={e => setFilterAreaFrom(e.target.value)} /><input className="form-input" placeholder="Кв² до" value={filterAreaTo} onChange={e => setFilterAreaTo(e.target.value)} /></div>
                       <div className="dual-input"><input className="form-input" placeholder="Комнаты от" value={filterRoomsFrom} onChange={e => setFilterRoomsFrom(e.target.value)} /><input className="form-input" placeholder="Комнаты до" value={filterRoomsTo} onChange={e => setFilterRoomsTo(e.target.value)} /></div>
                       <div className="dual-input"><input className="form-input" placeholder="Этаж от" value={filterFloorFrom} onChange={e => setFilterFloorFrom(e.target.value)} /><input className="form-input" placeholder="Этаж до" value={filterFloorTo} onChange={e => setFilterFloorTo(e.target.value)} /></div>
-                      <select className="form-input" value={filterDistrict} onChange={e => setFilterDistrict(e.target.value)}><option>Все районы</option><option>Пропустить</option><option>Альбурикент</option><option>Кировский</option><option>Кяхулай</option><option>Ленинский</option><option>Новый Кяхулай</option><option>Советский</option><option>Тарки</option></select>
+                      <select className="form-input" value={filterDistrict} onChange={e => setFilterDistrict(e.target.value)}><option>Все районы</option><option value="Пропустить">Пропустить</option><option>Альбурикент</option><option>Кировский</option><option>Кяхулай</option><option>Ленинский</option><option>Новый Кяхулай</option><option>Советский</option><option>Тарки</option></select>
                       <button className="save-btn" onClick={() => setShowFilters(false)}>ПРИМЕНИТЬ ФИЛЬТР</button>
                     </div>
                   </div>
@@ -410,11 +432,11 @@ export default function HomePage() {
               </div>
             )}
             <div className="list-section">
-              {registryTab === 'objects' && filteredObjects.map(obj => (<div className="registry-card" key={obj.id}><span className="type-badge">{obj.role || 'Продавец'}</span><h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p><p>{obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><span className="agent-tag-bottom">{obj.agent}</span></div>))}
-              {registryTab === 'clients' && filteredClients.map(cl => (<div className="registry-card" key={cl.id}><span className="type-badge">{cl.role || 'Покупатель'}</span><h3>Поиск: {cl.propertytype || cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p><p>{(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн • Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0}</p><p>{cl.district}, {cl.address}</p><span className="agent-tag-bottom">{cl.agent}</span></div>))}
+              {registryTab === 'objects' && filteredObjects.map(obj => (<div className="registry-card" key={obj.id}><span className="type-badge">{obj.role || 'Продавец'}</span>---<h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p><p>{obj.district === 'Пропустить' ? 'Все районы' : obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><span className="agent-tag-bottom">{obj.agent}</span></div>))}
+              {registryTab === 'clients' && filteredClients.map(cl => (<div className="registry-card" key={cl.id}><span className="type-badge">{cl.role || 'Покупатель'}</span><h3>Поиск: {cl.propertytype || cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p><p>{(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн • Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0}</p><p>{cl.district === 'Пропустить' ? 'Все районы' : cl.district}, {cl.address}</p><span className="agent-tag-bottom">{cl.agent}</span></div>))}
               {registryTab === 'agents' && allAgents.map(a => (<div className="agent-row-card" key={a.id}><div className="agent-info-side"><h3>{a.name}</h3><p>{a.phone}</p></div><div className="agent-stats-side"><div className="mini-badge">О: <span>{objects.filter(o => o.agent === a.name).length}</span></div><div className="mini-badge">К: <span>{clients.filter(c => c.agent === a.name).length}</span></div></div></div>))}
               {registryTab === 'matches' && (getMatches().length === 0 ? (<div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Активных матчей пока нет</div>) : (getMatches().map(m => (
-                    <div className="match-card" key={m.id}><div className="match-badge">МАТЧ: {m.object.role === 'Продавец' ? 'ПРОДАЖА' : 'АРЕНДА'}</div><div className="match-split"><div className="match-side"><h4>ОБЪЕКТ ({m.object.role})</h4><p className="m-type">{m.object.type}</p><p className="m-info">{m.object.rooms} комн • {m.object.area} м²</p><p className="m-dist">{m.object.district}</p><p className="m-price">{formatNumber(m.object.price)} ₽</p><span className="m-agent">Автор: {m.object.agent}</span></div><div className="match-divider"></div><div className="match-side"><h4>КЛИЕНТ ({m.client.role || 'Покупатель'})</h4><p className="m-type">Поиск: {m.client.propertytype || m.client.propertyType}</p><p className="m-info">{(m.client.roomsfrom || m.client.roomsFrom) || 0}-{(m.client.roomsto || m.client.roomsTo) || 0} комн • {(m.client.areafrom || m.client.areaFrom) || 0}-{(m.client.areato || m.client.areaTo) || 0} м²</p><p className="m-dist">{m.client.district}</p><p className="m-price">До {formatNumber(m.client.budgetto || m.client.budgetTo)} ₽</p><span className="m-agent">Автор: {m.client.agent}</span></div></div></div>
+                    <div className="match-card" key={m.id}><div className="match-badge">МАТЧ: {m.object.role === 'Продавец' ? 'ПРОДАЖА' : 'АРЕНДА'}</div><div className="match-split"><div className="match-side"><h4>ОБЪЕКТ ({m.object.role})</h4><p className="m-type">{m.object.type}</p><p className="m-info">{m.object.rooms} комн • {m.object.area} м²</p><p className="m-dist">{m.object.district === 'Пропустить' ? 'Все районы' : m.object.district}</p><p className="m-price">{formatNumber(m.object.price)} ₽</p><span className="m-agent">Автор: {m.object.agent}</span></div><div className="match-divider"></div><div className="match-side"><h4>КЛИЕНТ ({m.client.role || 'Покупатель'})</h4><p className="m-type">Поиск: {m.client.propertytype || m.client.propertyType}</p><p className="m-info">{(m.client.roomsfrom || m.client.roomsFrom) || 0}-{(m.client.roomsto || m.client.roomsTo) || 0} комн • {(m.client.areafrom || m.client.areaFrom) || 0}-{(m.client.areato || m.client.areaTo) || 0} м²</p><p className="m-dist">{m.client.district === 'Пропустить' ? 'Все районы' : m.client.district}</p><p className="m-price">До {formatNumber(m.client.budgetto || m.client.budgetTo)} ₽</p><span className="m-agent">Автор: {m.client.agent}</span></div></div></div>
                   ))))}
             </div>
           </>
@@ -459,6 +481,9 @@ export default function HomePage() {
         .agent-tag-bottom { position: absolute; right: 15px; top: 15px; font-size: 11px; color: #aaa; }
 
         .delete-card-btn { position: absolute; right: 15px; top: 15px; background: none; border: none; color: #ff4d4d; cursor: pointer; padding: 5px; }
+
+        .logout-btn-top { position: absolute; right: 20px; top: 20px; background: none; border: none; color: #ff4d4d; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid #ffebee; background-color: #fff5f5; }
+        .logout-btn-top:hover { background-color: #ffebee; }
 
         .agent-row-card { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 14px 16px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 8px; }
         .agent-info-side h3 { margin: 0 0 4px 0; font-size: 15px; color: #000; font-weight: 600; }

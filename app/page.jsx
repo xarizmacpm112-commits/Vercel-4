@@ -102,8 +102,8 @@ export default function HomePage() {
     const { error } = await supabase.from('clients').delete().eq('id', id)
     if (error) alert("Ошибка при удалении: " + error.message)
     else fetchClients()
-      }
-      const handleLogin = async () => {
+  }
+    const handleLogin = async () => {
     if (!agentName || !agentPhone) return alert("Заполните данные")
     try {
       const { data: existingAgent, error: fetchError } = await supabase
@@ -290,167 +290,315 @@ export default function HomePage() {
         </div>
       </main>
     )
-      }
-                                                                                       return (
-    <main className="crm-container">
-      <header className="topbar">
-        <div><h1>B2B GARANT</h1></div>
-        <button className={activeTab === 'profile' ? 'profile-btn active-prof' : 'profile-btn'} onClick={() => setActiveTab('profile')}><User size={20} /></button>
-      </header>
+        }
+      return (
+  <main className="crm-container">
+    <header className="topbar">
+      <div><h1>B2B GARANT</h1></div>
+      <button className={activeTab === 'profile' ? 'profile-btn active-prof' : 'profile-btn'} onClick={() => setActiveTab('profile')}>
+        <User size={20} />
+      </button>
+    </header>
 
-      <section className="content" style={{ paddingBottom: '100px' }}>
-        {activeTab === 'home' && (
-          <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
-              <div>
-                <p className="group-label">АГЕНТ</p>
-                <div className="stats-grid-3">
-                  <div className="stat-box-simple"><h3>{clients.filter(c => c.agent === agentName).length}</h3><span>Клиенты</span></div>
-                  <div className="stat-box-simple"><h3>{objects.filter(o => o.agent === agentName).length}</h3><span>Объекты</span></div>
-                  <div className="stat-box-simple"><h3>{getMatches().length}</h3><span>Матчи</span></div>
-                </div>
-              </div>
+    <section className="content" style={{ paddingBottom: '100px' }}>
 
-              <div>
-                <p className="group-label">КОМПАНИЯ</p>
-                <div className="stats-grid-3">
-                  <div className="stat-box-simple"><h3>{clients.length}</h3><span>Клиенты</span></div>
-                  <div className="stat-box-simple"><h3>{objects.length}</h3><span>Объекты</span></div>
-                  <div className="stat-box-simple"><h3>{allAgents.length}</h3><span>Агенты</span></div>
-                </div>
+      {activeTab === 'home' && (
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
+            <div>
+              <p className="group-label">АГЕНТ</p>
+              <div className="stats-grid-3">
+                <div className="stat-box-simple"><h3>{clients.filter(c => c.agent === agentName).length}</h3><span>Клиенты</span></div>
+                <div className="stat-box-simple"><h3>{objects.filter(o => o.agent === agentName).length}</h3><span>Объекты</span></div>
+                <div className="stat-box-simple"><h3>{getMatches().length}</h3><span>Матчи</span></div>
               </div>
             </div>
 
-            <div className="agents-section">
-              <div className="section-title"><Trophy size={18} /> Лучшие агенты</div>
+            <div>
+              <p className="group-label">КОМПАНИЯ</p>
+              <div className="stats-grid-3">
+                <div className="stat-box-simple"><h3>{clients.length}</h3><span>Клиенты</span></div>
+                <div className="stat-box-simple"><h3>{objects.length}</h3><span>Объекты</span></div>
+                <div className="stat-box-simple"><h3>{allAgents.length}</h3><span>Агенты</span></div>
+              </div>
+            </div>
+          </div>
 
-              {getTopAgents().map((agent, index) => {
-                const styleConfig = rankStyles[index] || { color: '#eee' }
-                return (
-                  <div
-                    key={agent.name}
-                    className="agent-rank-card"
-                    style={{
-                      borderColor: styleConfig.color,
-                      borderWidth: '2px',
-                      borderStyle: 'solid'
-                    }}
-                  >
-                    <div style={{ width: '30px', fontWeight: 'bold', color: styleConfig.color }}>
-                      {index + 1}
-                    </div>
+          <div className="agents-section">
+            <div className="section-title"><Trophy size={18} /> Лучшие агенты</div>
 
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ margin: 0, fontSize: '16px' }}>{agent.name}</h3>
-                      <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
-                        {agent.clientsCount} клиентов • {agent.objectsCount} объектов
-                      </p>
-                    </div>
+            {getTopAgents().map((agent, index) => {
+              const styleConfig = rankStyles[index] || { color: '#eee' }
 
-                    <Medal size={20} color={styleConfig.color} />
+              return (
+                <div key={agent.name} className="agent-rank-card"
+                  style={{ borderColor: styleConfig.color, borderWidth: '2px', borderStyle: 'solid' }}>
+
+                  <div style={{ width: '30px', fontWeight: 'bold', color: styleConfig.color }}>
+                    {index + 1}
                   </div>
-                )
-              })}
-            </div>
-          </>
-        )}
 
-        {activeTab === 'objects' && (
-          <div className="form-container">
-            <h2>Новый объект</h2>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>{agent.name}</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
+                      {agent.clientsCount} клиентов • {agent.objectsCount} объектов
+                    </p>
+                  </div>
 
-            <div className="form-stack">
-              <select className="form-input" value={newObject.role} onChange={e => setNewObject({ ...newObject, role: e.target.value })}>
-                <option>Продавец</option>
-                <option>Арендодатель</option>
-              </select>
-
-              <select className="form-input" value={newObject.type} onChange={e => setNewObject({ ...newObject, type: e.target.value })}>
-                <option>Квартира</option>
-                <option>Дом</option>
-                <option>Коммерция</option>
-              </select>
-
-              <input className="form-input" placeholder="Цена (₽)" value={formatNumber(newObject.price)} onChange={e => setNewObject({ ...newObject, price: e.target.value.replace(/\s/g, '') })} />
-              <input className="form-input" placeholder="Кв²" value={newObject.area} onChange={e => setNewObject({ ...newObject, area: e.target.value })} />
-              <input className="form-input" placeholder="Комнаты" value={newObject.rooms} onChange={e => setNewObject({ ...newObject, rooms: e.target.value })} />
-
-              {/* ЭТАЖ (ДОБАВЛЕНО БЕЗ ИЗМЕНЕНИЯ ДИЗАЙНА) */}
-              <input className="form-input" placeholder="Этаж" value={newObject.floor} onChange={e => setNewObject({ ...newObject, floor: e.target.value })} />
-
-              <select className="form-input" value={newObject.district} onChange={e => setNewObject({ ...newObject, district: e.target.value })}>
-                <option value="Пропустить">Все районы</option>
-                <option>Альбурикент</option>
-                <option>Кировский</option>
-                <option>Кяхулай</option>
-                <option>Ленинский</option>
-                <option>Новый Кяхулай</option>
-                <option>Советский</option>
-                <option>Тарки</option>
-              </select>
-
-              <input className="form-input" placeholder="Адрес" value={newObject.address} onChange={e => setNewObject({ ...newObject, address: e.target.value })} />
-
-              <button className="save-btn" onClick={addObject}>ДОБАВИТЬ В РЕЕСТР</button>
-            </div>
+                  <Medal size={20} color={styleConfig.color} />
+                </div>
+              )
+            })}
           </div>
-        )}
+        </>
+      )}
 
-        {activeTab === 'clients' && (
-          <div className="form-container">
-            <h2>Новый клиент</h2>
+      {activeTab === 'objects' && (
+        <div className="form-container">
+          <h2>Новый объект</h2>
+          <div className="form-stack">
 
-            <div className="form-stack">
-              <select className="form-input" value={newClient.role} onChange={e => setNewClient({ ...newClient, role: e.target.value })}>
-                <option>Покупатель</option>
-                <option>Арендатор</option>
-              </select>
+            <select className="form-input" value={newObject.role}
+              onChange={e => setNewObject({ ...newObject, role: e.target.value })}>
+              <option>Продавец</option>
+              <option>Арендодатель</option>
+            </select>
 
-              <select className="form-input" value={newClient.propertyType} onChange={e => setNewClient({ ...newClient, propertyType: e.target.value })}>
-                <option>Квартира</option>
-                <option>Дом</option>
-                <option>Коммерция</option>
-              </select>
+            <select className="form-input" value={newObject.type}
+              onChange={e => setNewObject({ ...newObject, type: e.target.value })}>
+              <option>Квартира</option>
+              <option>Дом</option>
+              <option>Коммерция</option>
+            </select>
 
-              <div className="dual-input">
-                <input className="form-input" placeholder="Цена от (₽)" value={formatNumber(newClient.budgetFrom)} onChange={e => setNewClient({ ...newClient, budgetFrom: e.target.value.replace(/\s/g, '') })} />
-                <input className="form-input" placeholder="Цена до (₽)" value={formatNumber(newClient.budgetTo)} onChange={e => setNewClient({ ...newClient, budgetTo: e.target.value.replace(/\s/g, '') })} />
-              </div>
+            <input className="form-input" placeholder="Цена (₽)"
+              value={formatNumber(newObject.price)}
+              onChange={e => setNewObject({ ...newObject, price: e.target.value.replace(/\s/g, '') })} />
 
-              <div className="dual-input">
-                <input className="form-input" placeholder="Кв² от" value={newClient.areaFrom} onChange={e => setNewClient({ ...newClient, areaFrom: e.target.value })} />
-                <input className="form-input" placeholder="Кв² до" value={newClient.areaTo} onChange={e => setNewClient({ ...newClient, areaTo: e.target.value })} />
-              </div>
+            <input className="form-input" placeholder="Кв²"
+              value={newObject.area}
+              onChange={e => setNewObject({ ...newObject, area: e.target.value })} />
 
-              <div className="dual-input">
-                <input className="form-input" placeholder="Комнат от" value={newClient.roomsFrom} onChange={e => setNewClient({ ...newClient, roomsFrom: e.target.value })} />
-                <input className="form-input" placeholder="Комнат до" value={newClient.roomsTo} onChange={e => setNewClient({ ...newClient, roomsTo: e.target.value })} />
-              </div>
+            <input className="form-input" placeholder="Комнаты"
+              value={newObject.rooms}
+              onChange={e => setNewObject({ ...newObject, rooms: e.target.value })} />
 
-              {/* ЭТАЖ (ТОЛЬКО ДОБАВЛЕНО) */}
-              <div className="dual-input">
-                <input className="form-input" placeholder="Этаж от" value={newClient.floorFrom} onChange={e => setNewClient({ ...newClient, floorFrom: e.target.value })} />
-                <input className="form-input" placeholder="Этаж до" value={newClient.floorTo} onChange={e => setNewClient({ ...newClient, floorTo: e.target.value })} />
-              </div>
+            <input className="form-input" placeholder="Этаж"
+              value={newObject.floor}
+              onChange={e => setNewObject({ ...newObject, floor: e.target.value })} />
 
-              <select className="form-input" value={newClient.district} onChange={e => setNewClient({ ...newClient, district: e.target.value })}>
-                <option value="Пропустить">Все районы</option>
-                <option>Альбурикент</option>
-                <option>Кировский</option>
-                <option>Кяхулай</option>
-                <option>Ленинский</option>
-                <option>Новый Кяхулай</option>
-                <option>Советский</option>
-                <option>Тарки</option>
-              </select>
+            <select className="form-input" value={newObject.district}
+              onChange={e => setNewObject({ ...newObject, district: e.target.value })}>
+              <option value="Пропустить">Все районы</option>
+              <option>Альбурикент</option>
+              <option>Кировский</option>
+              <option>Кяхулай</option>
+              <option>Ленинский</option>
+              <option>Новый Кяхулай</option>
+              <option>Советский</option>
+              <option>Тарки</option>
+            </select>
 
-              <input className="form-input" placeholder="Адрес" value={newClient.address} onChange={e => setNewClient({ ...newClient, address: e.target.value })} />
+            <input className="form-input" placeholder="Адрес"
+              value={newObject.address}
+              onChange={e => setNewObject({ ...newObject, address: e.target.value })} />
 
-              <button className="save-btn" onClick={addClient}>ДОБАВИТЬ В РЕЕСТР</button>
-            </div>
+            <button className="save-btn" onClick={addObject}>ДОБАВИТЬ В РЕЕСТР</button>
           </div>
-        )}
-              <nav className="bottom-nav">
+        </div>
+      )}
+
+      {activeTab === 'clients' && (
+        <div className="form-container">
+          <h2>Новый клиент</h2>
+
+          <div className="form-stack">
+
+            <select className="form-input" value={newClient.role}
+              onChange={e => setNewClient({ ...newClient, role: e.target.value })}>
+              <option>Покупатель</option>
+              <option>Арендатор</option>
+            </select>
+
+            <select className="form-input" value={newClient.propertyType}
+              onChange={e => setNewClient({ ...newClient, propertyType: e.target.value })}>
+              <option>Квартира</option>
+              <option>Дом</option>
+              <option>Коммерция</option>
+            </select>
+
+            <div className="dual-input">
+              <input className="form-input" placeholder="Цена от (₽)"
+                value={formatNumber(newClient.budgetFrom)}
+                onChange={e => setNewClient({ ...newClient, budgetFrom: e.target.value.replace(/\s/g, '') })} />
+
+              <input className="form-input" placeholder="Цена до (₽)"
+                value={formatNumber(newClient.budgetTo)}
+                onChange={e => setNewClient({ ...newClient, budgetTo: e.target.value.replace(/\s/g, '') })} />
+            </div>
+
+            <div className="dual-input">
+              <input className="form-input" placeholder="Кв² от"
+                value={newClient.areaFrom}
+                onChange={e => setNewClient({ ...newClient, areaFrom: e.target.value })} />
+
+              <input className="form-input" placeholder="Кв² до"
+                value={newClient.areaTo}
+                onChange={e => setNewClient({ ...newClient, areaTo: e.target.value })} />
+            </div>
+
+            <div className="dual-input">
+              <input className="form-input" placeholder="Комнат от"
+                value={newClient.roomsFrom}
+                onChange={e => setNewClient({ ...newClient, roomsFrom: e.target.value })} />
+
+              <input className="form-input" placeholder="Комнат до"
+                value={newClient.roomsTo}
+                onChange={e => setNewClient({ ...newClient, roomsTo: e.target.value })} />
+            </div>
+
+            {/* ✅ ДОБАВЛЕНО БЕЗ ИЗМЕНЕНИЯ СТРУКТУРЫ */}
+            <div className="dual-input">
+              <input className="form-input" placeholder="Этаж от"
+                value={newClient.floorFrom}
+                onChange={e => setNewClient({ ...newClient, floorFrom: e.target.value })} />
+
+              <input className="form-input" placeholder="Этаж до"
+                value={newClient.floorTo}
+                onChange={e => setNewClient({ ...newClient, floorTo: e.target.value })} />
+            </div>
+
+            <select className="form-input" value={newClient.district}
+              onChange={e => setNewClient({ ...newClient, district: e.target.value })}>
+              <option value="Пропустить">Все районы</option>
+              <option>Альбурикент</option>
+              <option>Кировский</option>
+              <option>Кяхулай</option>
+              <option>Ленинский</option>
+              <option>Новый Кяхулай</option>
+              <option>Советский</option>
+              <option>Тарки</option>
+            </select>
+
+            <input className="form-input" placeholder="Адрес"
+              value={newClient.address}
+              onChange={e => setNewClient({ ...newClient, address: e.target.value })} />
+
+            <button className="save-btn" onClick={addClient}>ДОБАВИТЬ В РЕЕСТР</button>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'registry' && (
+        <>
+          <div className="registry-nav-grid">
+            <button className={registryTab === 'objects' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('objects'); setShowFilters(false); setFilterRole('Все категории'); }}>Объекты</button>
+            <button className={registryTab === 'clients' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('clients'); setShowFilters(false); setFilterRole('Все категории'); }}>Клиенты</button>
+            <button className={registryTab === 'agents' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('agents'); setShowFilters(false); }}>Агенты</button>
+            <button className={registryTab === 'matches' ? 'reg-btn active' : 'reg-btn'} onClick={() => { setRegistryTab('matches'); setShowFilters(false); }}>Матчи</button>
+          </div>
+
+          <div className="list-section">
+
+            {registryTab === 'objects' && filteredObjects.map(obj => (
+              <div className="registry-card" key={obj.id}>
+                <span className="type-badge">{obj.role || 'Продавец'}</span>
+                <h3>{obj.type}</h3>
+                <p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p>
+                <p>{obj.district === 'Пропустить' ? 'Все районы' : obj.district}, {obj.address}</p>
+                <strong>{formatNumber(obj.price)} ₽</strong>
+                <span className="agent-tag-bottom">{obj.agent}</span>
+              </div>
+            ))}
+
+            {registryTab === 'clients' && filteredClients.map(cl => (
+              <div className="registry-card" key={cl.id}>
+                <span className="type-badge">{cl.role || 'Покупатель'}</span>
+                <h3>Поиск: {cl.propertytype || cl.propertyType}</h3>
+                <p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p>
+
+                {/* ✅ ДОБАВЛЕНО ЭТАЖИ */}
+                <p>
+                  {(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн •
+                  Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0} •
+                  Этаж: {(cl.floorfrom || cl.floorFrom) || 0}-{(cl.floorto || cl.floorTo) || 0}
+                </p>
+
+                <p>{cl.district === 'Пропустить' ? 'Все районы' : cl.district}, {cl.address}</p>
+                <span className="agent-tag-bottom">{cl.agent}</span>
+              </div>
+            ))}
+
+            {registryTab === 'agents' && allAgents.map(a => (
+              <div className="agent-row-card" key={a.id}>
+                <div className="agent-info-side">
+                  <h3>{a.name}</h3>
+                  <p>{a.phone}</p>
+                </div>
+                <div className="agent-stats-side">
+                  <div className="mini-badge">О: <span>{objects.filter(o => o.agent === a.name).length}</span></div>
+                  <div className="mini-badge">К: <span>{clients.filter(c => c.agent === a.name).length}</span></div>
+                </div>
+              </div>
+            ))}
+
+            {registryTab === 'matches' && (
+              getMatches().length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
+                  Активных матчей пока нет
+                </div>
+              ) : (
+                getMatches().map(m => (
+                  <div className="match-card" key={m.id}>
+                    <div className="match-badge">
+                      МАТЧ: {m.object.role === 'Продавец' ? 'ПРОДАЖА' : 'АРЕНДА'}
+                    </div>
+
+                    <div className="match-split">
+                      <div className="match-side">
+                        <h4>ОБЪЕКТ ({m.object.role})</h4>
+                        <p className="m-type">{m.object.type}</p>
+                        <p className="m-info">{m.object.rooms} комн • {m.object.area} м²</p>
+                        <p className="m-dist">{m.object.district === 'Пропустить' ? 'Все районы' : m.object.district}</p>
+                        <p className="m-price">{formatNumber(m.object.price)} ₽</p>
+                        <span className="m-agent">Автор: {m.object.agent}</span>
+                      </div>
+
+                      <div className="match-divider"></div>
+
+                      <div className="match-side">
+                        <h4>КЛИЕНТ ({m.client.role || 'Покупатель'})</h4>
+                        <p className="m-type">Поиск: {m.client.propertytype || m.client.propertyType}</p>
+
+                        <p className="m-info">
+                          {(m.client.roomsfrom || m.client.roomsFrom) || 0}-
+                          {(m.client.roomsto || m.client.roomsTo) || 0} комн •
+                          {(m.client.areafrom || m.client.areaFrom) || 0}-
+                          {(m.client.areato || m.client.areaTo) || 0} м²
+                        </p>
+
+                        {/* ✅ ДОБАВЛЕНО ЭТАЖИ */}
+                        <p className="m-info">
+                          Этаж: {(m.client.floorfrom || m.client.floorFrom) || 0}-
+                          {(m.client.floorto || m.client.floorTo) || 0}
+                        </p>
+
+                        <p className="m-dist">{m.client.district === 'Пропустить' ? 'Все районы' : m.client.district}</p>
+                        <p className="m-price">До {formatNumber(m.client.budgetto || m.client.budgetTo)} ₽</p>
+                        <span className="m-agent">Автор: {m.client.agent}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )
+            )}
+
+          </div>
+        </>
+      )}
+
+    </section>
+          <nav className="bottom-nav">
         <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}><Home size={22} /><span>Главная</span></button>
         <button className={activeTab === 'objects' ? 'active' : ''} onClick={() => setActiveTab('objects')}><Building2 size={22} /><span>Объект</span></button>
         <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}><Users size={22} /><span>Клиент</span></button>
@@ -532,5 +680,4 @@ export default function HomePage() {
       `}</style>
     </main>
   )
-      }
-      
+}

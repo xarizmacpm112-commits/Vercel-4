@@ -290,8 +290,8 @@ export default function HomePage() {
         </div>
       </main>
     )
-                           }
-      return (
+      }
+        return (
     <main className="crm-container">
       <header className="topbar">
         <div><h1>B2B GARANT</h1></div>
@@ -310,6 +310,7 @@ export default function HomePage() {
                   <div className="stat-box-simple"><h3>{getMatches().length}</h3><span>Матчи</span></div>
                 </div>
               </div>
+
               <div>
                 <p className="group-label">КОМПАНИЯ</p>
                 <div className="stats-grid-3">
@@ -327,7 +328,12 @@ export default function HomePage() {
                 return (
                   <div key={agent.name} className="agent-rank-card" style={{ borderColor: styleConfig.color, borderWidth: '2px', borderStyle: 'solid' }}>
                     <div style={{ width: '30px', fontWeight: 'bold', color: styleConfig.color }}>{index + 1}</div>
-                    <div style={{ flex: 1 }}><h3 style={{ margin: 0, fontSize: '16px' }}>{agent.name}</h3><p style={{ margin: 0, fontSize: '12px', color: '#666' }}>{agent.clientsCount} клиентов • {agent.objectsCount} объектов</p></div>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ margin: 0, fontSize: '16px' }}>{agent.name}</h3>
+                      <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
+                        {agent.clientsCount} клиентов • {agent.objectsCount} объектов
+                      </p>
+                    </div>
                     <Medal size={20} color={styleConfig.color} />
                   </div>
                 )
@@ -340,21 +346,13 @@ export default function HomePage() {
           <div className="form-container">
             <h2>Новый объект</h2>
             <div className="form-stack">
-              <select className="form-input" value={newObject.role} onChange={e => setNewObject({...newObject, role: e.target.value})}>
-                <option>Продавец</option>
-                <option>Арендодатель</option>
-              </select>
-
-              <select className="form-input" value={newObject.type} onChange={e => setNewObject({...newObject, type: e.target.value})}>
-                <option>Квартира</option>
-                <option>Дом</option>
-                <option>Коммерция</option>
-              </select>
-
+              <select className="form-input" value={newObject.role} onChange={e => setNewObject({...newObject, role: e.target.value})}><option>Продавец</option><option>Арендодатель</option></select>
+              <select className="form-input" value={newObject.type} onChange={e => setNewObject({...newObject, type: e.target.value})}><option>Квартира</option><option>Дом</option><option>Коммерция</option></select>
               <input className="form-input" placeholder="Цена (₽)" value={formatNumber(newObject.price)} onChange={e => setNewObject({...newObject, price: e.target.value.replace(/\s/g, '')})} />
               <input className="form-input" placeholder="Кв²" value={newObject.area} onChange={e => setNewObject({...newObject, area: e.target.value})} />
               <input className="form-input" placeholder="Комнаты" value={newObject.rooms} onChange={e => setNewObject({...newObject, rooms: e.target.value})} />
 
+              {/* ЭТАЖ */}
               <input className="form-input" placeholder="Этаж" value={newObject.floor} onChange={e => setNewObject({...newObject, floor: e.target.value})} />
 
               <select className="form-input" value={newObject.district} onChange={e => setNewObject({...newObject, district: e.target.value})}>
@@ -405,6 +403,7 @@ export default function HomePage() {
                 <input className="form-input" placeholder="Комнат до" value={newClient.roomsTo} onChange={e => setNewClient({...newClient, roomsTo: e.target.value})} />
               </div>
 
+              {/* ЭТАЖ (ДОБАВЛЕНО ТОЛЬКО ЭТО) */}
               <div className="dual-input">
                 <input className="form-input" placeholder="Этаж от" value={newClient.floorFrom} onChange={e => setNewClient({...newClient, floorFrom: e.target.value})} />
                 <input className="form-input" placeholder="Этаж до" value={newClient.floorTo} onChange={e => setNewClient({...newClient, floorTo: e.target.value})} />

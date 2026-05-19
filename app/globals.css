@@ -7,7 +7,7 @@
 body {
   font-family: Arial, sans-serif;
   /* Фотография на фоне — 100% ЧЁТКАЯ И ОРИГИНАЛЬНАЯ ВЕЗДЕ */
-  background-image: url('/1779017630460.jpg');
+  background-image: url('/1778008679710.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -224,80 +224,4 @@ body {
   background: #2563eb;
   color: white;
   font-weight: bold;
-}
-
-/* СТИЛИ ДЛЯ НОВОГО КРАСИВОГО ЧЕРНО-БЕЛОГО УВЕДОМЛЕНИЯ */
-.custom-alert-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  z-index: 99999;
-  animation: customFadeIn 0.2s ease-out;
-}
-
-.custom-alert-card {
-  width: 100%;
-  max-width: 360px;
-  background: #1c1c1e;
-  border: 1px solid #2c2c2e;
-  padding: 24px;
-  border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  text-align: center;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-}
-
-.custom-alert-card h2 {
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.custom-alert-card p {
-  color: #aeaeae;
-  font-size: 14px;
-  line-height: 1.4;
-  margin-bottom: 8px;
-}
-
-.custom-alert-btns {
-  display: flex;
-  gap: 12px;
-  width: 100%;
-}
-
-.custom-alert-card .btn-ok {
-  flex: 1;
-  height: 44px;
-  border: none;
-  background: #ffffff;
-  color: #000000;
-  font-weight: bold;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.custom-alert-card .btn-cancel {
-  flex: 1;
-  height: 44px;
-  border: 1px solid #2c2c2e;
-  background: #2c2c2e;
-  color: #ffffff;
-  font-weight: normal;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-@keyframes customFadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
 }

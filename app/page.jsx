@@ -102,8 +102,8 @@ export default function HomePage() {
     const { error } = await supabase.from('clients').delete().eq('id', id)
     if (error) alert("Ошибка при удалении: " + error.message)
     else fetchClients()
-  }
-    const handleLogin = async () => {
+    }
+      const handleLogin = async () => {
     if (!agentName || !agentPhone) return alert("Заполните данные")
     try {
       const { data: existingAgent, error: fetchError } = await supabase
@@ -291,7 +291,7 @@ export default function HomePage() {
       </main>
     )
     }
-      return (
+        return (
     <main className="crm-container">
       <header className="topbar">
         <div><h1>B2B GARANT</h1></div>
@@ -398,7 +398,7 @@ export default function HomePage() {
                   <p style={{ textAlign: 'center', color: '#888', padding: '20px' }}>Нет объектов по выбранным фильтрам</p>
                 ) : (
                   objects.filter(o => o.agent === agentName && (filterRole === 'Все категории' || o.role === filterRole)).map(obj => (
-                    <div className="registry-card" key={obj.id}><span className="type-badge">{obj.role || 'Продавец'}</span><h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p><p>{obj.district === 'Пропустить' ? 'Все районы' : obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><button className="delete-card-btn" onClick={() => deleteObject(obj.id)}><Trash2 size={16} /></button></div>
+                    <div className="registry-card" key={obj.id}><span className="type-badge">{obj.role || 'Продавец'}</span><h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м²  • Этаж {obj.floor}</p><p>{obj.district === 'Пропустить' ? 'Все районы' : obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><button className="delete-card-btn" onClick={() => deleteObject(obj.id)}><Trash2 size={16} /></button></div>
                   ))
                 )
               )}
@@ -407,7 +407,7 @@ export default function HomePage() {
                   <p style={{ textAlign: 'center', color: '#888', padding: '20px' }}>Нет заявок по выбранным фильтрам</p>
                 ) : (
                   clients.filter(c => c.agent === agentName && (filterRole === 'Все категории' || (c.role || 'Покупатель') === filterRole)).map(cl => (
-                    <div className="registry-card" key={cl.id}><span className="type-badge">{cl.role || 'Покупатель'}</span><h3>Поиск: {cl.propertytype || cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p><p>{(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн • Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0}• Этаж: {(cl.floorfrom || cl.floorFrom) || 0}-{(cl.floorto || cl.floorTo) || 0}</p><p>{cl.district === 'Пропустить' ? 'Все районы' : cl.district}, {cl.address}</p><button className="delete-card-btn" onClick={() => deleteClient(cl.id)}><Trash2 size={16} /></button></div>
+                    <div className="registry-card" key={cl.id}><span className="type-badge">{cl.role || 'Покупатель'}</span><h3>Поиск: {cl.propertytype || cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p><p>{(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн • Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0}•       Этаж: {(cl.floorfrom || cl.floorFrom) || 0}-{(cl.floorto || cl.floorTo) || 0}</p><p>{cl.district === 'Пропустить' ? 'Все районы' : cl.district}, {cl.address}</p><button className="delete-card-btn" onClick={() => deleteClient(cl.id)}><Trash2 size={16} /></button></div>
                   ))
                 )
               )}
@@ -451,17 +451,17 @@ export default function HomePage() {
               </div>
             )}
             <div className="list-section">
-              {registryTab === 'objects' && filteredObjects.map(obj => (<div className="registry-card" key={obj.id}><span className="type-badge">{obj.role || 'Продавец'}</span><h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м² • Этаж {obj.floor}</p><p>{obj.district === 'Пропустить' ? 'Все районы' : obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><span className="agent-tag-bottom">{obj.agent}</span></div>))}
-              {registryTab === 'clients' && filteredClients.map(cl => (<div className="registry-card" key={cl.id}><span className="type-badge">{cl.role || 'Покупатель'}</span><h3>Поиск: {cl.propertytype || cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p><p>{(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн • Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0}• Этаж: {(cl.floorfrom || cl.floorFrom) || 0}-{(cl.floorto || cl.floorTo) || 0}</p><p>{cl.district === 'Пропустить' ? 'Все районы' : cl.district}, {cl.address}</p><span className="agent-tag-bottom">{cl.agent}</span></div>))}
+              {registryTab === 'objects' && filteredObjects.map(obj => (<div className="registry-card" key={obj.id}><span className="type-badge">{obj.role || 'Продавец'}</span><h3>{obj.type}</h3><p>{obj.rooms} комн • {obj.area}м²   • Этаж {obj.floor}</p><p>{obj.district === 'Пропустить' ? 'Все районы' : obj.district}, {obj.address}</p><strong>{formatNumber(obj.price)} ₽</strong><span className="agent-tag-bottom">{obj.agent}</span></div>))}
+              {registryTab === 'clients' && filteredClients.map(cl => (<div className="registry-card" key={cl.id}><span className="type-badge">{cl.role || 'Покупатель'}</span><h3>Поиск: {cl.propertytype || cl.propertyType}</h3><p>Бюджет: {formatNumber(cl.budgetfrom || cl.budgetFrom)} - {formatNumber(cl.budgetto || cl.budgetTo)} ₽</p><p>{(cl.roomsfrom || cl.roomsFrom) || 0}-{(cl.roomsto || cl.roomsTo) || 0} комн • Кв²: {(cl.areafrom || cl.areaFrom) || 0}-{(cl.areato || cl.areaTo) || 0} • Этаж: {(cl.floorfrom || cl.floorFrom) || 0}-{(cl.floorto || cl.floorTo) || 0}</p><p>{cl.district === 'Пропустить' ? 'Все районы' : cl.district}, {cl.address}</p><span className="agent-tag-bottom">{cl.agent}</span></div>))}
               {registryTab === 'agents' && allAgents.map(a => (<div className="agent-row-card" key={a.id}><div className="agent-info-side"><h3>{a.name}</h3><p>{a.phone}</p></div><div className="agent-stats-side"><div className="mini-badge">О: <span>{objects.filter(o => o.agent === a.name).length}</span></div><div className="mini-badge">К: <span>{clients.filter(c => c.agent === a.name).length}</span></div></div></div>))}
               {registryTab === 'matches' && (getMatches().length === 0 ? (<div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Активных матчей пока нет</div>) : (getMatches().map(m => (
-                    <div className="match-card" key={m.id}><div className="match-badge">МАТЧ: {m.object.role === 'Продавец' ? 'ПРОДАЖА' : 'АРЕНДА'}</div><div className="match-split"><div className="match-side"><h4>ОБЪЕКТ ({m.object.role})</h4><p className="m-type">{m.object.type}</p><p className="m-info">{m.object.rooms} комн • {m.object.area} м²</p><p className="m-dist">{m.object.district === 'Пропустить' ? 'Все районы' : m.object.district}</p><p className="m-price">{formatNumber(m.object.price)} ₽</p><span className="m-agent">Автор: {m.object.agent}</span></div><div className="match-divider"></div><div className="match-side"><h4>КЛИЕНТ ({m.client.role || 'Покупатель'})</h4><p className="m-type">Поиск: {m.client.propertytype || m.client.propertyType}</p><p className="m-info">{(m.client.roomsfrom || m.client.roomsFrom) || 0}-{(m.client.roomsto || m.client.roomsTo) || 0} комн • {(m.client.areafrom || m.client.areaFrom) || 0}-{(m.client.areato || m.client.areaTo) || 0} м²• Этаж: {(m.client.floorfrom || m.client.floorFrom) || 0}-{(m.client.floorto || m.client.floorTo) || 0}</p><p className="m-dist">{m.client.district === 'Пропустить' ? 'Все районы' : m.client.district}</p><p className="m-price">До {formatNumber(m.client.budgetto || m.client.budgetTo)} ₽</p><span className="m-agent">Автор: {m.client.agent}</span></div></div></div>
+                    <div className="match-card" key={m.id}><div className="match-badge">МАТЧ: {m.object.role === 'Продавец' ? 'ПРОДАЖА' : 'АРЕНДА'}</div><div className="match-split"><div className="match-side"><h4>ОБЪЕКТ ({m.object.role})</h4><p className="m-type">{m.object.type}</p><p className="m-info">{m.object.rooms} комн • {m.object.area} м² • Этаж {m.object.floor}</p><p className="m-dist">{m.object.district === 'Пропустить' ? 'Все районы' : m.object.district}</p><p className="m-price">{formatNumber(m.object.price)} ₽</p><span className="m-agent">Автор: {m.object.agent}</span></div><div className="match-divider"></div><div className="match-side"><h4>КЛИЕНТ ({m.client.role || 'Покупатель'})</h4><p className="m-type">Поиск: {m.client.propertytype || m.client.propertyType}</p><p className="m-info">{(m.client.roomsfrom || m.client.roomsFrom) || 0}-{(m.client.roomsto || m.client.roomsTo) || 0} комн • {(m.client.areafrom || m.client.areaFrom) || 0}-{(m.client.areato || m.client.areaTo) || 0} м² • Этаж: {(m.client.floorfrom || m.client.floorFrom) || 0}-{(m.client.floorto || m.client.floorTo) || 0}</p><p className="m-dist">{m.client.district === 'Пропустить' ? 'Все районы' : m.client.district}</p><p className="m-price">До {formatNumber(m.client.budgetto || m.client.budgetTo)} ₽</p><span className="m-agent">Автор: {m.client.agent}</span></div></div></div>
                   ))))}
             </div>
           </>
         )}
       </section>
-                                         <nav className="bottom-nav">
+                                                                                                                                                                                              <nav className="bottom-nav">
         <button className={activeTab === 'home' ? 'active' : ''} onClick={() => setActiveTab('home')}><Home size={22} /><span>Главная</span></button>
         <button className={activeTab === 'objects' ? 'active' : ''} onClick={() => setActiveTab('objects')}><Building2 size={22} /><span>Объект</span></button>
         <button className={activeTab === 'clients' ? 'active' : ''} onClick={() => setActiveTab('clients')}><Users size={22} /><span>Клиент</span></button>
